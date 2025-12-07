@@ -5,9 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebXR Quest Game Arcade</title>
     <style>
-        body {
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -15,7 +19,7 @@
         }
 
         #container {
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
@@ -24,61 +28,145 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            text-align: center;
-            padding: 20px;
-            box-sizing: border-box;
+            z-index: 100;
+            transition: opacity 0.3s;
         }
 
-        h1 {
-            font-size: 3em;
-            margin: 0 0 20px 0;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        .title {
+            font-size: 4em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.4);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .subtitle {
+            font-size: 1.5em;
+            margin-bottom: 40px;
+            opacity: 0.9;
         }
 
         #status {
-            font-size: 1.2em;
-            margin: 20px 0;
-            padding: 15px 30px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 10px;
-            backdrop-filter: blur(10px);
+            font-size: 1.3em;
+            margin: 30px 0;
+            padding: 20px 40px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 15px;
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(255,255,255,0.2);
         }
 
-        #enterVRButton {
-            padding: 20px 40px;
-            font-size: 1.5em;
+        .btn {
+            padding: 20px 50px;
+            font-size: 1.8em;
             background: white;
             color: #667eea;
             border: none;
-            border-radius: 50px;
+            border-radius: 60px;
             cursor: pointer;
             font-weight: bold;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
             transition: all 0.3s ease;
-            display: none;
+            margin: 10px;
         }
 
-        #enterVRButton:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+        .btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 45px rgba(0,0,0,0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            backdrop-filter: blur(10px);
         }
 
         canvas {
             display: block;
-            width: 100%;
-            height: 100%;
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .game-info {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.5em;
+            z-index: 50;
+            backdrop-filter: blur(10px);
+        }
+
+        .score {
+            color: #00ff88;
+            font-weight: bold;
+        }
+
+        #instructions {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            padding: 20px 30px;
+            border-radius: 10px;
+            text-align: center;
+            z-index: 50;
+            backdrop-filter: blur(10px);
+            max-width: 600px;
+        }
+
+        .button-prompt {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin: 5px;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
     <div id="container">
-        <h1>🎮 Quest Game Arcade</h1>
-        <div id="status">Initializing WebXR...</div>
-        <button id="enterVRButton">Enter VR Arcade</button>
+        <div class="title">🎮 VR GAME ARCADE</div>
+        <div class="subtitle">Experience 5 Amazing VR Games</div>
+        <div id="status">Checking WebXR Support...</div>
+        <button id="enterVRButton" class="btn hidden">🥽 ENTER VR</button>
+        <div style="margin-top: 20px;">
+            <button id="helpButton" class="btn btn-secondary hidden">❓ How to Play</button>
+        </div>
     </div>
+
+    <div id="gameInfo" class="game-info hidden">
+        <span id="gameName"></span> | Score: <span class="score" id="score">0</span> | <span id="extraInfo"></span>
+    </div>
+
+    <div id="instructions" class="hidden">
+        <div style="font-size: 1.3em; margin-bottom: 10px;">📋 CONTROLS</div>
+        <div><span class="button-prompt">TRIGGER</span> Shoot / Interact</div>
+        <div><span class="button-prompt">GRIP</span> Exit to Menu</div>
+        <div style="margin-top: 10px; font-size: 0.9em; opacity: 0.7;">Point at game icons to select</div>
+    </div>
+
     <canvas id="xrCanvas"></canvas>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -86,31 +174,75 @@
         const canvas = document.getElementById('xrCanvas');
         const statusEl = document.getElementById('status');
         const enterBtn = document.getElementById('enterVRButton');
+        const helpBtn = document.getElementById('helpButton');
         const container = document.getElementById('container');
+        const gameInfo = document.getElementById('gameInfo');
+        const instructions = document.getElementById('instructions');
+        const gameNameEl = document.getElementById('gameName');
+        const scoreEl = document.getElementById('score');
+        const extraInfoEl = document.getElementById('extraInfo');
 
         let scene, camera, renderer, controllers = [];
         let currentGame = null;
         let gameButtons = [];
         let xrSession = null;
+        let menuTexts = [];
 
         const games = [
-            { name: 'Target Shooter', icon: '🎯', color: 0xff0055, passthrough: false },
-            { name: 'Fruit Ninja VR', icon: '🗡️', color: 0x00ff88, passthrough: false },
-            { name: 'Boxing Arena', icon: '🥊', color: 0xff6600, passthrough: true },
-            { name: 'Piano Hero', icon: '🎹', color: 0x0088ff, passthrough: false },
-            { name: 'AR Portal Defense', icon: '🛡️', color: 0xff00ff, passthrough: true }
+            { 
+                name: 'Target Shooter', 
+                icon: '🎯', 
+                color: 0xff0055, 
+                passthrough: false,
+                desc: 'Shoot 20 targets as fast as you can!'
+            },
+            { 
+                name: 'Fruit Ninja VR', 
+                icon: '🗡️', 
+                color: 0x00ff88, 
+                passthrough: false,
+                desc: 'Slice flying fruits with your controllers!'
+            },
+            { 
+                name: 'Boxing Arena', 
+                icon: '🥊', 
+                color: 0xff6600, 
+                passthrough: true,
+                desc: 'Punch bags in your real space! (AR)'
+            },
+            { 
+                name: 'Piano Hero', 
+                icon: '🎹', 
+                color: 0x0088ff, 
+                passthrough: false,
+                desc: 'Hit the falling notes in rhythm!'
+            },
+            { 
+                name: 'Portal Defense', 
+                icon: '🛡️', 
+                color: 0xff00ff, 
+                passthrough: true,
+                desc: 'Defend your room from invaders! (AR)'
+            }
         ];
 
-        // Game state objects
-        let targetShooterState = { targets: [], score: 0, timeLeft: 60 };
-        let fruitNinjaState = { fruits: [], score: 0, combo: 0 };
-        let boxingState = { bags: [], score: 0, power: 0 };
-        let pianoState = { notes: [], score: 0, streak: 0 };
-        let portalDefenseState = { enemies: [], portals: [], score: 0, health: 100 };
+        let gameState = {
+            score: 0,
+            time: 0,
+            health: 100,
+            combo: 0
+        };
+
+        let targetShooterState = { targets: [], targetCount: 0, maxTargets: 20 };
+        let fruitNinjaState = { fruits: [], lastSpawn: 0 };
+        let boxingState = { bags: [], lastPunchTime: {} };
+        let pianoState = { notes: [], keys: [], lastSpawn: 0 };
+        let portalDefenseState = { enemies: [], portal: null, lastSpawn: 0 };
 
         function init() {
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x1a1a2e);
+            scene.background = new THREE.Color(0x0a0a1a);
+            scene.fog = new THREE.Fog(0x0a0a1a, 5, 20);
 
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
             camera.position.set(0, 1.6, 3);
@@ -120,17 +252,26 @@
             renderer.setPixelRatio(window.devicePixelRatio);
             renderer.xr.enabled = true;
 
-            const ambient = new THREE.AmbientLight(0xffffff, 0.8);
+            const ambient = new THREE.AmbientLight(0xffffff, 0.6);
             scene.add(ambient);
 
-            const directional = new THREE.DirectionalLight(0xffffff, 0.5);
+            const directional = new THREE.DirectionalLight(0xffffff, 0.8);
             directional.position.set(5, 10, 5);
             scene.add(directional);
+
+            const point1 = new THREE.PointLight(0xff0055, 1, 10);
+            point1.position.set(-3, 2, 0);
+            scene.add(point1);
+
+            const point2 = new THREE.PointLight(0x0088ff, 1, 10);
+            point2.position.set(3, 2, 0);
+            scene.add(point2);
 
             setupControllers();
             createGameMenu();
             checkVRSupport();
 
+            helpBtn.onclick = toggleInstructions;
             window.addEventListener('resize', onResize);
             renderer.setAnimationLoop(render);
         }
@@ -140,62 +281,112 @@
                 const controller = renderer.xr.getController(i);
                 controller.addEventListener('selectstart', onSelectStart);
                 controller.addEventListener('selectend', onSelectEnd);
+                controller.addEventListener('squeezestart', onSqueezeStart);
                 
                 const geometry = new THREE.BufferGeometry().setFromPoints([
                     new THREE.Vector3(0, 0, 0),
                     new THREE.Vector3(0, 0, -5)
                 ]);
-                const line = new THREE.Line(geometry, new THREE.LineBasicMaterial({ color: 0x00ffff }));
+                const line = new THREE.Line(geometry, new THREE.LineBasicMaterial({ 
+                    color: 0x00ffff,
+                    linewidth: 3
+                }));
                 controller.add(line);
                 scene.add(controller);
                 
                 const grip = renderer.xr.getControllerGrip(i);
                 const mesh = new THREE.Mesh(
-                    new THREE.CylinderGeometry(0.01, 0.02, 0.2, 8),
-                    new THREE.MeshStandardMaterial({ color: 0xffffff })
+                    new THREE.SphereGeometry(0.05),
+                    new THREE.MeshStandardMaterial({ 
+                        color: 0xffffff,
+                        emissive: 0x00ffff,
+                        emissiveIntensity: 0.5
+                    })
                 );
                 grip.add(mesh);
                 scene.add(grip);
                 
-                controllers.push({ controller, grip, line });
+                controllers.push({ controller, grip, line, mesh });
             }
         }
 
         function createGameMenu() {
-            const radius = 2.5;
+            const radius = 3;
+            const height = 1.6;
+            
             games.forEach((game, i) => {
                 const angle = (i / games.length) * Math.PI * 2 - Math.PI / 2;
                 
-                const button = new THREE.Group();
+                const group = new THREE.Group();
                 
+                // Main button panel
                 const panel = new THREE.Mesh(
-                    new THREE.BoxGeometry(0.6, 0.6, 0.1),
+                    new THREE.BoxGeometry(0.8, 0.8, 0.15),
                     new THREE.MeshStandardMaterial({ 
                         color: game.color,
-                        metalness: 0.5,
-                        roughness: 0.2
+                        metalness: 0.7,
+                        roughness: 0.3,
+                        emissive: game.color,
+                        emissiveIntensity: 0.3
                     })
                 );
-                button.add(panel);
+                group.add(panel);
                 
-                button.position.set(
+                // Glow effect
+                const glow = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.9, 0.9, 0.05),
+                    new THREE.MeshBasicMaterial({ 
+                        color: game.color,
+                        transparent: true,
+                        opacity: 0.3
+                    })
+                );
+                glow.position.z = -0.1;
+                group.add(glow);
+                
+                group.position.set(
                     Math.cos(angle) * radius,
-                    1.6,
+                    height + Math.sin(i * 0.7) * 0.3,
                     Math.sin(angle) * radius
                 );
-                button.lookAt(camera.position);
+                group.lookAt(new THREE.Vector3(0, height, 0));
                 
-                button.userData = { game: game, panel: panel };
-                scene.add(button);
-                gameButtons.push(button);
+                group.userData = { 
+                    game: game, 
+                    panel: panel,
+                    glow: glow,
+                    originalY: group.position.y,
+                    index: i
+                };
+                
+                scene.add(group);
+                gameButtons.push(group);
             });
+            
+            // Add floor grid
+            const gridHelper = new THREE.GridHelper(15, 15, 0x00ff88, 0x004444);
+            gridHelper.position.y = 0;
+            scene.add(gridHelper);
+            
+            // Add title text effect
+            const titleGeometry = new THREE.TorusGeometry(0.5, 0.1, 16, 100);
+            const titleMaterial = new THREE.MeshStandardMaterial({
+                color: 0x00ffff,
+                emissive: 0x00ffff,
+                emissiveIntensity: 0.5
+            });
+            const titleRing = new THREE.Mesh(titleGeometry, titleMaterial);
+            titleRing.position.set(0, 2.5, 0);
+            titleRing.rotation.x = Math.PI / 2;
+            scene.add(titleRing);
+            menuTexts.push(titleRing);
         }
 
         function onSelectStart(event) {
             const controller = event.target;
+            controller.userData.selectPressed = true;
             
             if (!currentGame) {
-                // Menu selection
                 const raycaster = new THREE.Raycaster();
                 const tempMatrix = new THREE.Matrix4();
                 tempMatrix.identity().extractRotation(controller.matrixWorld);
@@ -208,151 +399,200 @@
                     startGame(button.userData.game);
                 }
             } else {
-                // Game interaction
-                controller.userData.triggerPressed = true;
-                handleGameInteraction(controller);
+                handleGameShoot(controller);
             }
         }
 
         function onSelectEnd(event) {
-            event.target.userData.triggerPressed = false;
+            event.target.userData.selectPressed = false;
+        }
+
+        function onSqueezeStart(event) {
+            if (currentGame) {
+                exitGame();
+            }
+        }
+
+        function toggleInstructions() {
+            instructions.classList.toggle('hidden');
         }
 
         async function startGame(game) {
             currentGame = game;
+            gameState = { score: 0, time: Date.now(), health: 100, combo: 0 };
             
-            // Hide menu
             gameButtons.forEach(b => b.visible = false);
+            menuTexts.forEach(t => t.visible = false);
             
-            // Enable passthrough if needed
-            if (game.passthrough && xrSession) {
-                try {
-                    const layer = xrSession.renderState.layers?.[0];
-                    if (xrSession.requestReferenceSpace) {
-                        // Request passthrough (Quest API)
-                        scene.background = null;
-                    }
-                } catch (e) {
-                    console.log('Passthrough not available');
-                }
+            gameInfo.classList.remove('hidden');
+            instructions.classList.remove('hidden');
+            gameNameEl.textContent = game.name;
+            scoreEl.textContent = '0';
+            
+            if (game.passthrough) {
+                scene.background = null;
+                scene.fog = null;
             } else {
-                scene.background = new THREE.Color(0x1a1a2e);
+                scene.background = new THREE.Color(0x0a0a1a);
             }
             
-            // Initialize game
             switch(game.name) {
                 case 'Target Shooter': initTargetShooter(); break;
                 case 'Fruit Ninja VR': initFruitNinja(); break;
                 case 'Boxing Arena': initBoxing(); break;
                 case 'Piano Hero': initPianoHero(); break;
-                case 'AR Portal Defense': initPortalDefense(); break;
+                case 'Portal Defense': initPortalDefense(); break;
             }
         }
 
         function exitGame() {
             currentGame = null;
-            scene.background = new THREE.Color(0x1a1a2e);
+            scene.background = new THREE.Color(0x0a0a1a);
+            scene.fog = new THREE.Fog(0x0a0a1a, 5, 20);
             
-            // Clear game objects
             scene.children.filter(c => c.userData.gameObject).forEach(c => scene.remove(c));
             
-            // Show menu
             gameButtons.forEach(b => b.visible = true);
+            menuTexts.forEach(t => t.visible = true);
+            gameInfo.classList.add('hidden');
+            instructions.classList.add('hidden');
             
-            // Reset states
-            targetShooterState = { targets: [], score: 0, timeLeft: 60 };
-            fruitNinjaState = { fruits: [], score: 0, combo: 0 };
-            boxingState = { bags: [], score: 0, power: 0 };
-            pianoState = { notes: [], score: 0, streak: 0 };
-            portalDefenseState = { enemies: [], portals: [], score: 0, health: 100 };
+            targetShooterState = { targets: [], targetCount: 0, maxTargets: 20 };
+            fruitNinjaState = { fruits: [], lastSpawn: 0 };
+            boxingState = { bags: [], lastPunchTime: {} };
+            pianoState = { notes: [], keys: [], lastSpawn: 0 };
+            portalDefenseState = { enemies: [], portal: null, lastSpawn: 0 };
+        }
+
+        function updateUI() {
+            scoreEl.textContent = gameState.score;
+            if (currentGame) {
+                switch(currentGame.name) {
+                    case 'Target Shooter':
+                        extraInfoEl.textContent = `Targets: ${targetShooterState.targetCount}/${targetShooterState.maxTargets}`;
+                        break;
+                    case 'Fruit Ninja VR':
+                        extraInfoEl.textContent = `Combo: x${gameState.combo}`;
+                        break;
+                    case 'Boxing Arena':
+                        extraInfoEl.textContent = `Power: ${Math.floor(gameState.combo)}%`;
+                        break;
+                    case 'Piano Hero':
+                        extraInfoEl.textContent = `Streak: ${gameState.combo}`;
+                        break;
+                    case 'Portal Defense':
+                        extraInfoEl.textContent = `Health: ${gameState.health}%`;
+                        break;
+                }
+            }
         }
 
         // TARGET SHOOTER
         function initTargetShooter() {
-            targetShooterState.startTime = Date.now();
-            for (let i = 0; i < 5; i++) {
-                spawnTarget();
-            }
+            targetShooterState = { targets: [], targetCount: 0, maxTargets: 20 };
+            for (let i = 0; i < 5; i++) spawnTarget();
         }
 
         function spawnTarget() {
+            if (targetShooterState.targetCount >= targetShooterState.maxTargets) return;
+            
             const target = new THREE.Mesh(
-                new THREE.SphereGeometry(0.2),
-                new THREE.MeshStandardMaterial({ color: 0xff0000 })
+                new THREE.SphereGeometry(0.25),
+                new THREE.MeshStandardMaterial({ 
+                    color: 0xff0000,
+                    emissive: 0xff0000,
+                    emissiveIntensity: 0.3
+                })
             );
             target.position.set(
-                (Math.random() - 0.5) * 8,
-                Math.random() * 3 + 0.5,
-                -Math.random() * 5 - 3
+                (Math.random() - 0.5) * 10,
+                Math.random() * 3 + 1,
+                -Math.random() * 6 - 2
             );
-            target.userData = { gameObject: true, type: 'target', velocity: new THREE.Vector3() };
+            target.userData = { gameObject: true, type: 'target', rotSpeed: Math.random() * 0.05 };
             scene.add(target);
             targetShooterState.targets.push(target);
+            targetShooterState.targetCount++;
         }
 
         function updateTargetShooter() {
-            targetShooterState.timeLeft = 60 - (Date.now() - targetShooterState.startTime) / 1000;
-            if (targetShooterState.timeLeft <= 0) {
-                exitGame();
-                return;
-            }
-
-            targetShooterState.targets.forEach(target => {
-                target.rotation.x += 0.05;
-                target.rotation.y += 0.05;
+            targetShooterState.targets.forEach(t => {
+                t.rotation.x += t.userData.rotSpeed;
+                t.rotation.y += t.userData.rotSpeed;
             });
-
-            if (targetShooterState.targets.length < 5 && Math.random() < 0.02) {
+            
+            if (targetShooterState.targets.length < 5 && targetShooterState.targetCount < targetShooterState.maxTargets) {
                 spawnTarget();
+            }
+            
+            if (targetShooterState.targetCount >= targetShooterState.maxTargets && targetShooterState.targets.length === 0) {
+                exitGame();
             }
         }
 
         // FRUIT NINJA VR
         function initFruitNinja() {
-            setInterval(() => {
-                if (currentGame?.name === 'Fruit Ninja VR') spawnFruit();
-            }, 1000);
+            fruitNinjaState = { fruits: [], lastSpawn: 0 };
         }
 
         function spawnFruit() {
-            const colors = [0xff0000, 0xff6600, 0xffff00, 0x00ff00];
+            const colors = [0xff0000, 0xff6600, 0xffff00, 0x00ff00, 0xff1493];
             const fruit = new THREE.Mesh(
-                new THREE.SphereGeometry(0.15),
+                new THREE.SphereGeometry(0.2),
                 new THREE.MeshStandardMaterial({ color: colors[Math.floor(Math.random() * colors.length)] })
             );
-            fruit.position.set((Math.random() - 0.5) * 4, 0, -3);
+            fruit.position.set((Math.random() - 0.5) * 5, 0.5, -3);
             fruit.userData = { 
                 gameObject: true, 
                 type: 'fruit',
-                velocity: new THREE.Vector3((Math.random() - 0.5) * 0.05, 0.15, 0)
+                velocity: new THREE.Vector3((Math.random() - 0.5) * 0.08, 0.2 + Math.random() * 0.1, 0),
+                rotSpeed: new THREE.Vector3(Math.random() * 0.2, Math.random() * 0.2, Math.random() * 0.2)
             };
             scene.add(fruit);
             fruitNinjaState.fruits.push(fruit);
         }
 
-        function updateFruitNinja() {
+        function updateFruitNinja(time) {
+            if (time - fruitNinjaState.lastSpawn > 800) {
+                spawnFruit();
+                fruitNinjaState.lastSpawn = time;
+            }
+            
             fruitNinjaState.fruits.forEach((fruit, i) => {
-                fruit.userData.velocity.y -= 0.005;
+                fruit.userData.velocity.y -= 0.008;
                 fruit.position.add(fruit.userData.velocity);
-                fruit.rotation.x += 0.1;
-                fruit.rotation.z += 0.1;
+                fruit.rotation.x += fruit.userData.rotSpeed.x;
+                fruit.rotation.y += fruit.userData.rotSpeed.y;
+                fruit.rotation.z += fruit.userData.rotSpeed.z;
                 
-                if (fruit.position.y < 0) {
+                if (fruit.position.y < -1) {
                     scene.remove(fruit);
                     fruitNinjaState.fruits.splice(i, 1);
+                    gameState.combo = 0;
                 }
             });
         }
 
-        // BOXING ARENA (PASSTHROUGH)
+        // BOXING ARENA
         function initBoxing() {
+            boxingState = { bags: [], lastPunchTime: {} };
             for (let i = 0; i < 3; i++) {
                 const bag = new THREE.Mesh(
-                    new THREE.CylinderGeometry(0.2, 0.25, 0.8, 16),
-                    new THREE.MeshStandardMaterial({ color: 0xff0000 })
+                    new THREE.CylinderGeometry(0.25, 0.3, 1.2, 16),
+                    new THREE.MeshStandardMaterial({ 
+                        color: 0xff0000,
+                        metalness: 0.3,
+                        roughness: 0.7
+                    })
                 );
-                bag.position.set((i - 1) * 1.5, 1.6, -2);
-                bag.userData = { gameObject: true, type: 'punchbag', swing: 0 };
+                bag.position.set((i - 1) * 1.8, 1.6, -2);
+                bag.userData = { 
+                    gameObject: true, 
+                    type: 'punchbag', 
+                    swing: 0,
+                    hits: 0,
+                    id: i
+                };
                 scene.add(bag);
                 boxingState.bags.push(bag);
             }
@@ -360,107 +600,145 @@
 
         function updateBoxing() {
             boxingState.bags.forEach(bag => {
-                bag.userData.swing *= 0.95;
+                bag.userData.swing *= 0.92;
                 bag.rotation.z = bag.userData.swing;
             });
+            
+            gameState.combo *= 0.98;
         }
 
         // PIANO HERO
         function initPianoHero() {
-            const keys = 8;
-            for (let i = 0; i < keys; i++) {
-                const key = new THREE.Mesh(
-                    new THREE.BoxGeometry(0.3, 0.05, 1),
-                    new THREE.MeshStandardMaterial({ color: i % 2 === 0 ? 0xffffff : 0x000000 })
-                );
-                key.position.set((i - keys / 2) * 0.35, 1, -1.5);
-                key.userData = { gameObject: true, type: 'pianokey', note: i };
-                scene.add(key);
-            }
+            pianoState = { notes: [], keys: [], lastSpawn: 0 };
+            const keyCount = 8;
+            const colors = [0xffffff, 0x000000];
             
-            setInterval(() => {
-                if (currentGame?.name === 'Piano Hero') spawnNote();
-            }, 1500);
+            for (let i = 0; i < keyCount; i++) {
+                const key = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.35, 0.05, 1.2),
+                    new THREE.MeshStandardMaterial({ 
+                        color: colors[i % 2],
+                        metalness: 0.5,
+                        roughness: 0.5
+                    })
+                );
+                key.position.set((i - keyCount / 2) * 0.4, 0.8, -1.5);
+                key.userData = { gameObject: true, type: 'pianokey', note: i, pressed: false };
+                scene.add(key);
+                pianoState.keys.push(key);
+            }
         }
 
         function spawnNote() {
             const note = new THREE.Mesh(
-                new THREE.SphereGeometry(0.1),
-                new THREE.MeshStandardMaterial({ color: 0x00ffff, emissive: 0x0088ff })
+                new THREE.SphereGeometry(0.15),
+                new THREE.MeshStandardMaterial({ 
+                    color: 0x00ffff,
+                    emissive: 0x00ffff,
+                    emissiveIntensity: 0.5
+                })
             );
             const lane = Math.floor(Math.random() * 8);
-            note.position.set((lane - 4) * 0.35, 3, -1.5);
-            note.userData = { gameObject: true, type: 'note', lane: lane, speed: 0.02 };
+            note.position.set((lane - 4) * 0.4, 3.5, -1.5);
+            note.userData = { gameObject: true, type: 'note', lane: lane, speed: 0.03 };
             scene.add(note);
             pianoState.notes.push(note);
         }
 
-        function updatePianoHero() {
+        function updatePianoHero(time) {
+            if (time - pianoState.lastSpawn > 1200) {
+                spawnNote();
+                pianoState.lastSpawn = time;
+            }
+            
             pianoState.notes.forEach((note, i) => {
                 note.position.y -= note.userData.speed;
-                if (note.position.y < 0.5) {
+                note.rotation.x += 0.1;
+                note.rotation.y += 0.1;
+                
+                if (note.position.y < 0.3) {
                     scene.remove(note);
                     pianoState.notes.splice(i, 1);
+                    gameState.combo = 0;
+                }
+            });
+            
+            pianoState.keys.forEach(key => {
+                if (key.userData.pressed) {
+                    key.position.y = 0.75;
+                    key.userData.pressed = false;
+                } else {
+                    key.position.y += (0.8 - key.position.y) * 0.3;
                 }
             });
         }
 
-        // AR PORTAL DEFENSE (PASSTHROUGH)
+        // PORTAL DEFENSE
         function initPortalDefense() {
+            portalDefenseState = { enemies: [], portal: null, lastSpawn: 0 };
             scene.background = null;
+            scene.fog = null;
             
-            // Create portal
             const portal = new THREE.Mesh(
-                new THREE.TorusGeometry(0.5, 0.1, 16, 32),
+                new THREE.TorusGeometry(0.6, 0.15, 16, 32),
                 new THREE.MeshStandardMaterial({ 
-                    color: 0xff00ff, 
+                    color: 0xff00ff,
                     emissive: 0xff00ff,
-                    emissiveIntensity: 0.5
+                    emissiveIntensity: 0.8
                 })
             );
             portal.position.set(0, 1.6, -3);
             portal.userData = { gameObject: true, type: 'portal' };
             scene.add(portal);
-            portalDefenseState.portals.push(portal);
-            
-            setInterval(() => {
-                if (currentGame?.name === 'AR Portal Defense') spawnEnemy();
-            }, 2000);
+            portalDefenseState.portal = portal;
         }
 
         function spawnEnemy() {
             const enemy = new THREE.Mesh(
-                new THREE.OctahedronGeometry(0.2),
-                new THREE.MeshStandardMaterial({ color: 0xff0000, emissive: 0xff0000 })
+                new THREE.OctahedronGeometry(0.25),
+                new THREE.MeshStandardMaterial({ 
+                    color: 0xff0000,
+                    emissive: 0xff0000,
+                    emissiveIntensity: 0.5
+                })
             );
-            enemy.position.copy(portalDefenseState.portals[0].position);
+            enemy.position.copy(portalDefenseState.portal.position);
             enemy.userData = { 
-                gameObject: true, 
+                gameObject: true,
                 type: 'enemy',
-                velocity: new THREE.Vector3((Math.random() - 0.5) * 0.02, 0, 0.03)
+                velocity: new THREE.Vector3((Math.random() - 0.5) * 0.03, (Math.random() - 0.5) * 0.02, 0.04)
             };
             scene.add(enemy);
             portalDefenseState.enemies.push(enemy);
         }
 
-        function updatePortalDefense() {
-            portalDefenseState.portals.forEach(p => p.rotation.z += 0.02);
+        function updatePortalDefense(time) {
+            if (portalDefenseState.portal) {
+                portalDefenseState.portal.rotation.z += 0.03;
+            }
+            
+            if (time - portalDefenseState.lastSpawn > 1500) {
+                spawnEnemy();
+                portalDefenseState.lastSpawn = time;
+            }
             
             portalDefenseState.enemies.forEach((enemy, i) => {
                 enemy.position.add(enemy.userData.velocity);
                 enemy.rotation.x += 0.1;
-                enemy.rotation.y += 0.1;
+                enemy.rotation.y += 0.15;
                 
-                if (enemy.position.z > 2) {
+                if (enemy.position.z > 3) {
                     scene.remove(enemy);
                     portalDefenseState.enemies.splice(i, 1);
-                    portalDefenseState.health -= 10;
-                    if (portalDefenseState.health <= 0) exitGame();
+                    gameState.health -= 10;
+                    if (gameState.health <= 0) {
+                        exitGame();
+                    }
                 }
             });
         }
 
-        function handleGameInteraction(controller) {
+        function handleGameShoot(controller) {
             const raycaster = new THREE.Raycaster();
             const tempMatrix = new THREE.Matrix4();
             tempMatrix.identity().extractRotation(controller.matrixWorld);
@@ -473,78 +751,41 @@
                     const target = intersects[0].object;
                     scene.remove(target);
                     targetShooterState.targets = targetShooterState.targets.filter(t => t !== target);
-                    targetShooterState.score += 10;
-                    spawnTarget();
+                    gameState.score += 100;
+                    updateUI();
                 }
-            } else if (currentGame.name === 'AR Portal Defense') {
+            } else if (currentGame.name === 'Portal Defense') {
                 const intersects = raycaster.intersectObjects(portalDefenseState.enemies);
                 if (intersects.length > 0) {
                     const enemy = intersects[0].object;
                     scene.remove(enemy);
                     portalDefenseState.enemies = portalDefenseState.enemies.filter(e => e !== enemy);
-                    portalDefenseState.score += 10;
+                    gameState.score += 50;
+                    updateUI();
+                }
+            } else if (currentGame.name === 'Piano Hero') {
+                const intersects = raycaster.intersectObjects(pianoState.keys);
+                if (intersects.length > 0) {
+                    const key = intersects[0].object;
+                    key.userData.pressed = true;
+                    
+                    const hitNotes = pianoState.notes.filter(note => 
+                        note.userData.lane === key.userData.note && 
+                        note.position.y < 1.2 && note.position.y > 0.5
+                    );
+                    
+                    hitNotes.forEach(note => {
+                        scene.remove(note);
+                        pianoState.notes = pianoState.notes.filter(n => n !== note);
+                        gameState.score += 10;
+                        gameState.combo++;
+                        updateUI();
+                    });
                 }
             }
         }
 
-        async function checkVRSupport() {
-            if (!navigator.xr) {
-                statusEl.textContent = '❌ WebXR not supported';
-                return;
-            }
-
-            try {
-                const supported = await navigator.xr.isSessionSupported('immersive-vr');
-                if (supported) {
-                    statusEl.textContent = '✅ Ready! Enter VR to play games';
-                    enterBtn.style.display = 'block';
-                    enterBtn.onclick = startVR;
-                } else {
-                    statusEl.textContent = '❌ Use Meta Quest Browser';
-                }
-            } catch (err) {
-                statusEl.textContent = '❌ Error: ' + err.message;
-            }
-        }
-
-        async function startVR() {
-            try {
-                xrSession = await navigator.xr.requestSession('immersive-vr', {
-                    optionalFeatures: ['local-floor', 'bounded-floor', 'hand-tracking', 'layers']
-                });
-                await renderer.xr.setSession(xrSession);
-                container.style.display = 'none';
-            } catch (err) {
-                statusEl.textContent = '❌ Failed: ' + err.message;
-            }
-        }
-
-        function render(time) {
-            if (currentGame) {
-                switch(currentGame.name) {
-                    case 'Target Shooter': updateTargetShooter(); break;
-                    case 'Fruit Ninja VR': updateFruitNinja(); break;
-                    case 'Boxing Arena': updateBoxing(); break;
-                    case 'Piano Hero': updatePianoHero(); break;
-                    case 'AR Portal Defense': updatePortalDefense(); break;
-                }
-            } else {
-                gameButtons.forEach((button, i) => {
-                    button.rotation.y = Math.sin(time * 0.001 + i) * 0.1;
-                    button.position.y = 1.6 + Math.sin(time * 0.002 + i) * 0.1;
-                });
-            }
-
-            renderer.render(scene, camera);
-        }
-
-        function onResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        }
-
-        init();
-    </script>
-</body>
-</html>
+        function checkControllerCollisions() {
+            if (!currentGame) return;
+            
+            controllers.forEach((ctrl, idx) => {
