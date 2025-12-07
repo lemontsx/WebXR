@@ -114,58 +114,138 @@
             font-size: 20px;
         }
         
-        #ui-overlay {
+        #ui-panel {
             position: fixed;
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(15, 15, 25, 0.92);
+            background: rgba(15, 15, 25, 0.95);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 50px;
-            padding: 20px 40px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 24px 32px;
             z-index: 1000;
             display: none;
-            align-items: center;
-            gap: 20px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            flex-direction: column;
+            gap: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+            min-width: 400px;
         }
         
-        #ui-overlay.active {
+        #ui-panel.active {
             display: flex;
         }
         
-        .voice-status {
+        .status-badge {
             display: flex;
             align-items: center;
-            gap: 12px;
-            color: white;
-            font-size: 16px;
+            justify-content: center;
+            gap: 10px;
+            padding: 12px 20px;
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid rgba(34, 197, 94, 0.4);
+            border-radius: 30px;
+            color: #86efac;
+            font-size: 14px;
             font-weight: 600;
         }
         
-        .voice-icon {
-            font-size: 24px;
-            color: #667eea;
-        }
-        
-        .voice-icon.listening {
-            color: #22c55e;
-            animation: pulse 1.5s ease-in-out infinite;
+        .status-badge i {
+            font-size: 18px;
+            animation: pulse 2s ease-in-out infinite;
         }
         
         @keyframes pulse {
             0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.7; transform: scale(1.1); }
+            50% { opacity: 0.6; transform: scale(1.1); }
         }
         
-        #transcript {
+        .input-section {
+            display: flex;
+            gap: 12px;
+        }
+        
+        #text-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 14px 18px;
+            color: white;
+            font-size: 16px;
+            font-family: inherit;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        
+        #text-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+        
+        #text-input:focus {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(99, 102, 241, 0.5);
+        }
+        
+        #spawn-btn {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border: none;
+            color: white;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        #spawn-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+        }
+        
+        #spawn-btn:active {
+            transform: translateY(0);
+        }
+        
+        .particle-count {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        .particle-count span {
+            color: #6366f1;
+            font-weight: 700;
+            font-size: 16px;
+        }
+        
+        .quick-words {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .quick-word {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             color: rgba(255, 255, 255, 0.7);
-            font-size: 14px;
-            max-width: 300px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .quick-word:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            transform: translateY(-2px);
         }
         
         canvas {
@@ -179,123 +259,175 @@
             <div class="start-icon">
                 <i class="fa-solid fa-wand-magic-sparkles"></i>
             </div>
-            <h1 class="start-title">Voice Particles AR</h1>
-            <p class="start-subtitle">Speak words and watch them materialize as particles in your space. Touch them with your hands to scatter!</p>
+            <h1 class="start-title">Particle Letters AR</h1>
+            <p class="start-subtitle">Type words and watch them materialize as floating particles. Touch them with your hands to scatter!</p>
             <button id="enter-ar-btn">
                 <i class="fa-solid fa-play"></i>
                 <span>Start Experience</span>
             </button>
             <div class="feature-list">
                 <div class="feature-item">
-                    <i class="fa-solid fa-microphone"></i>
-                    <span>Speak any word</span>
+                    <i class="fa-solid fa-keyboard"></i>
+                    <span>Type any word or phrase</span>
                 </div>
                 <div class="feature-item">
                     <i class="fa-solid fa-hand-sparkles"></i>
-                    <span>Touch particles to scatter them</span>
+                    <span>Swipe through particles to scatter</span>
                 </div>
                 <div class="feature-item">
                     <i class="fa-solid fa-eye"></i>
-                    <span>Passthrough AR - see your real world</span>
+                    <span>See your real environment</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="ui-overlay">
-        <div class="voice-status">
-            <i class="fa-solid fa-microphone voice-icon" id="voice-icon"></i>
-            <span id="voice-text">Say something...</span>
+    <div id="ui-panel">
+        <div class="status-badge">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>AR MODE ACTIVE</span>
         </div>
-        <div id="transcript"></div>
+        
+        <div class="input-section">
+            <input type="text" id="text-input" placeholder="Type a word or phrase..." maxlength="30">
+            <button id="spawn-btn">
+                <i class="fa-solid fa-sparkles"></i>
+                <span>Spawn</span>
+            </button>
+        </div>
+        
+        <div class="quick-words">
+            <button class="quick-word" data-word="HELLO">HELLO</button>
+            <button class="quick-word" data-word="COOL">COOL</button>
+            <button class="quick-word" data-word="AWESOME">AWESOME</button>
+            <button class="quick-word" data-word="WOW">WOW</button>
+        </div>
+        
+        <div class="particle-count">
+            Active Particles: <span id="particle-count">0</span>
+        </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
         // ========== GLOBAL STATE ==========
         let scene, camera, renderer, xrSession;
-        let recognition;
         let particles = [];
-        let hands = [];
+        let handMarkers = [];
         
         const startScreen = document.getElementById('start-screen');
         const enterArBtn = document.getElementById('enter-ar-btn');
-        const uiOverlay = document.getElementById('ui-overlay');
-        const voiceIcon = document.getElementById('voice-icon');
-        const voiceText = document.getElementById('voice-text');
-        const transcriptEl = document.getElementById('transcript');
+        const uiPanel = document.getElementById('ui-panel');
+        const textInput = document.getElementById('text-input');
+        const spawnBtn = document.getElementById('spawn-btn');
+        const particleCountEl = document.getElementById('particle-count');
         
         // ========== PARTICLE SYSTEM ==========
         class Particle {
-            constructor(x, y, z, char) {
+            constructor(x, y, z, char, color) {
                 this.char = char;
                 this.position = new THREE.Vector3(x, y, z);
                 this.velocity = new THREE.Vector3(0, 0, 0);
                 this.basePosition = new THREE.Vector3(x, y, z);
                 this.scattered = false;
+                this.life = 1.0;
+                this.color = color;
                 
                 // Create sprite for character
                 const canvas = document.createElement('canvas');
-                canvas.width = 64;
-                canvas.height = 64;
+                canvas.width = 128;
+                canvas.height = 128;
                 const ctx = canvas.getContext('2d');
-                ctx.fillStyle = '#ffffff';
-                ctx.font = 'bold 48px Arial';
+                
+                // Add glow effect
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = color;
+                ctx.fillStyle = color;
+                ctx.font = 'bold 96px Arial';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(char, 32, 32);
+                ctx.fillText(char, 64, 64);
                 
                 const texture = new THREE.CanvasTexture(canvas);
                 const material = new THREE.SpriteMaterial({ 
                     map: texture, 
                     transparent: true,
-                    opacity: 1
+                    opacity: 1,
+                    depthTest: false
                 });
                 
                 this.sprite = new THREE.Sprite(material);
-                this.sprite.scale.set(0.1, 0.1, 0.1);
+                this.sprite.scale.set(0.15, 0.15, 0.15);
                 this.sprite.position.copy(this.position);
                 
                 scene.add(this.sprite);
             }
             
-            update(deltaTime, handPositions) {
-                // Check collision with hands
-                for (let handPos of handPositions) {
-                    const dist = this.position.distanceTo(handPos);
-                    if (dist < 0.15) { // 15cm collision radius
+            update(deltaTime, controllerPositions) {
+                // Check collision with controllers
+                for (let ctrlPos of controllerPositions) {
+                    const dist = this.position.distanceTo(ctrlPos);
+                    if (dist < 0.2) { // 20cm collision radius
                         this.scattered = true;
                         const direction = new THREE.Vector3()
-                            .subVectors(this.position, handPos)
+                            .subVectors(this.position, ctrlPos)
                             .normalize();
-                        this.velocity.add(direction.multiplyScalar(0.5));
+                        this.velocity.add(direction.multiplyScalar(0.8));
                     }
                 }
                 
                 if (this.scattered) {
                     // Apply physics
-                    this.velocity.y -= 0.01; // Gravity
-                    this.velocity.multiplyScalar(0.98); // Drag
+                    this.velocity.y -= 0.015; // Gravity
+                    this.velocity.multiplyScalar(0.97); // Drag
                     this.position.add(this.velocity);
                     
                     // Fade out
-                    this.sprite.material.opacity *= 0.99;
+                    this.life *= 0.98;
+                    this.sprite.material.opacity = this.life;
                     
                     // Remove if too far or faded
-                    if (this.sprite.material.opacity < 0.01 || 
-                        this.position.distanceTo(this.basePosition) > 5) {
+                    if (this.life < 0.01 || this.position.y < -2) {
                         scene.remove(this.sprite);
                         return false;
                     }
                 } else {
                     // Float gently
                     const time = Date.now() * 0.001;
-                    this.position.y = this.basePosition.y + Math.sin(time + this.basePosition.x * 5) * 0.02;
+                    this.position.y = this.basePosition.y + Math.sin(time * 2 + this.basePosition.x * 10) * 0.03;
+                    this.sprite.material.opacity = 0.8 + Math.sin(time * 3) * 0.2;
                 }
                 
                 this.sprite.position.copy(this.position);
                 return true;
             }
+        }
+        
+        // ========== HAND VISUALIZATION ==========
+        function createHandMarker() {
+            const geometry = new THREE.SphereGeometry(0.08, 16, 16);
+            const material = new THREE.MeshStandardMaterial({
+                color: 0x6366f1,
+                emissive: 0x6366f1,
+                emissiveIntensity: 0.5,
+                transparent: true,
+                opacity: 0.8
+            });
+            const sphere = new THREE.Mesh(geometry, material);
+            
+            // Add ring around sphere
+            const ringGeometry = new THREE.TorusGeometry(0.1, 0.015, 16, 32);
+            const ringMaterial = new THREE.MeshStandardMaterial({
+                color: 0x8b5cf6,
+                emissive: 0x8b5cf6,
+                emissiveIntensity: 0.6
+            });
+            const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+            ring.rotation.x = Math.PI / 2;
+            sphere.add(ring);
+            
+            scene.add(sphere);
+            return { mesh: sphere, ring: ring };
         }
         
         // ========== TEXT TO PARTICLES ==========
@@ -305,107 +437,84 @@
             
             console.log('Creating particles for:', cleanText);
             
-            // Position in front of user
+            // Get camera position and direction
             const cameraPos = new THREE.Vector3();
             camera.getWorldPosition(cameraPos);
             const cameraDir = new THREE.Vector3();
             camera.getWorldDirection(cameraDir);
             
+            // Position text in front of camera
             const textPos = cameraPos.clone().add(cameraDir.multiplyScalar(1.5));
-            textPos.y += 0.3; // Slightly above eye level
+            textPos.y += 0.2; // Slightly above center
             
-            const charSpacing = 0.12;
+            const colors = ['#6366f1', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'];
+            const charSpacing = 0.15;
             const totalWidth = cleanText.length * charSpacing;
-            const startX = textPos.x - totalWidth / 2;
+            const startX = -totalWidth / 2;
             
             for (let i = 0; i < cleanText.length; i++) {
                 const char = cleanText[i];
                 if (char === ' ') continue;
                 
-                const x = startX + i * charSpacing;
-                const y = textPos.y + (Math.random() - 0.5) * 0.05;
-                const z = textPos.z + (Math.random() - 0.5) * 0.05;
+                const localX = startX + i * charSpacing;
+                const localY = (Math.random() - 0.5) * 0.08;
+                const localZ = (Math.random() - 0.5) * 0.08;
                 
-                particles.push(new Particle(x, y, z, char));
+                // Transform to world space
+                const worldPos = new THREE.Vector3(localX, localY, localZ);
+                worldPos.applyQuaternion(camera.quaternion);
+                worldPos.add(textPos);
+                
+                const color = colors[i % colors.length];
+                particles.push(new Particle(worldPos.x, worldPos.y, worldPos.z, char, color));
             }
             
-            console.log('Total particles:', particles.length);
+            updateParticleCount();
         }
         
-        // ========== VOICE RECOGNITION ==========
-        function setupVoiceRecognition() {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            
-            if (!SpeechRecognition) {
-                console.error('Speech recognition not supported');
-                voiceText.textContent = 'Voice not supported';
-                return;
-            }
-            
-            recognition = new SpeechRecognition();
-            recognition.continuous = true;
-            recognition.interimResults = true;
-            recognition.lang = 'en-US';
-            
-            recognition.onstart = () => {
-                console.log('Voice recognition started');
-                voiceIcon.classList.add('listening');
-                voiceText.textContent = 'Listening...';
-            };
-            
-            recognition.onresult = (event) => {
-                const last = event.results.length - 1;
-                const result = event.results[last];
-                const transcript = result[0].transcript;
-                
-                transcriptEl.textContent = transcript;
-                
-                if (result.isFinal) {
-                    console.log('Final transcript:', transcript);
-                    createTextParticles(transcript);
-                    transcriptEl.textContent = '';
-                }
-            };
-            
-            recognition.onerror = (event) => {
-                console.error('Speech recognition error:', event.error);
-                if (event.error === 'not-allowed') {
-                    voiceText.textContent = 'Microphone access denied';
-                }
-            };
-            
-            recognition.onend = () => {
-                console.log('Voice recognition ended, restarting...');
-                if (xrSession) {
-                    setTimeout(() => recognition.start(), 100);
-                }
-            };
-            
-            recognition.start();
+        function updateParticleCount() {
+            particleCountEl.textContent = particles.length;
         }
         
-        // ========== HAND TRACKING ==========
-        function updateHandPositions() {
-            hands = [];
+        // ========== CONTROLLER TRACKING ==========
+        function getControllerPositions() {
+            const positions = [];
             
-            if (!xrSession || !xrSession.inputSources) return;
+            if (!xrSession || !xrSession.inputSources) return positions;
             
             for (const source of xrSession.inputSources) {
-                if (source.hand) {
-                    // Get hand joint positions
-                    const indexTip = source.hand.get('index-finger-tip');
-                    if (indexTip) {
-                        const pose = xrSession.frame?.getPose(indexTip, xrSession.referenceSpace);
-                        if (pose) {
-                            hands.push(new THREE.Vector3(
-                                pose.transform.position.x,
-                                pose.transform.position.y,
-                                pose.transform.position.z
-                            ));
+                if (source.gripSpace) {
+                    const frame = renderer.xr.getFrame();
+                    const referenceSpace = renderer.xr.getReferenceSpace();
+                    const pose = frame.getPose(source.gripSpace, referenceSpace);
+                    
+                    if (pose) {
+                        const pos = new THREE.Vector3(
+                            pose.transform.position.x,
+                            pose.transform.position.y,
+                            pose.transform.position.z
+                        );
+                        positions.push(pos);
+                        
+                        // Update hand marker
+                        if (handMarkers.length < positions.length) {
+                            handMarkers.push(createHandMarker());
                         }
+                        
+                        const marker = handMarkers[positions.length - 1];
+                        marker.mesh.position.copy(pos);
+                        marker.mesh.visible = true;
+                        marker.ring.rotation.z += 0.05;
                     }
                 }
             }
+            
+            // Hide unused markers
+            for (let i = positions.length; i < handMarkers.length; i++) {
+                handMarkers[i].mesh.visible = false;
+            }
+            
+            return positions;
         }
         
         // ========== THREE.JS SETUP ==========
@@ -418,8 +527,12 @@
             renderer.xr.enabled = true;
             document.body.appendChild(renderer.domElement);
             
-            const ambientLight = new THREE.AmbientLight(0xffffff, 1);
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
             scene.add(ambientLight);
+            
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.6);
+            dirLight.position.set(5, 10, 5);
+            scene.add(dirLight);
             
             renderer.setAnimationLoop(render);
         }
@@ -427,34 +540,43 @@
         // ========== XR SESSION ==========
         async function startXRSession() {
             console.log('Starting XR session...');
+            enterArBtn.disabled = true;
+            enterArBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Starting...</span>';
             
             try {
                 xrSession = await navigator.xr.requestSession('immersive-ar', {
                     requiredFeatures: ['local-floor'],
-                    optionalFeatures: ['hand-tracking']
+                    optionalFeatures: ['hand-tracking', 'bounded-floor']
                 });
                 
-                console.log('XR session created');
+                console.log('✅ XR session started successfully!');
                 
                 await renderer.xr.setSession(xrSession);
                 
                 startScreen.classList.add('hidden');
-                uiOverlay.classList.add('active');
+                uiPanel.classList.add('active');
                 
-                setupVoiceRecognition();
+                // Auto-spawn welcome message
+                setTimeout(() => {
+                    createTextParticles('WELCOME');
+                }, 1000);
                 
                 xrSession.addEventListener('end', () => {
                     console.log('XR session ended');
-                    if (recognition) {
-                        recognition.stop();
-                    }
-                    uiOverlay.classList.remove('active');
+                    uiPanel.classList.remove('active');
                     startScreen.classList.remove('hidden');
+                    enterArBtn.disabled = false;
+                    enterArBtn.innerHTML = '<i class="fa-solid fa-play"></i> <span>Start Experience</span>';
+                    particles = [];
+                    handMarkers.forEach(m => scene.remove(m.mesh));
+                    handMarkers = [];
                 });
                 
             } catch (error) {
-                console.error('XR session error:', error);
-                alert('Failed to start AR. Error: ' + error.message);
+                console.error('❌ XR session error:', error);
+                alert('Failed to start AR: ' + error.message + '\n\nMake sure you:\n1. Allowed camera access\n2. Are using Quest Browser\n3. Have a clear play area');
+                enterArBtn.disabled = false;
+                enterArBtn.innerHTML = '<i class="fa-solid fa-play"></i> <span>Start Experience</span>';
             }
         }
         
@@ -464,13 +586,37 @@
             const deltaTime = (time - lastTime) / 1000;
             lastTime = time;
             
-            updateHandPositions();
+            const controllerPos = getControllerPositions();
             
             // Update all particles
-            particles = particles.filter(particle => particle.update(deltaTime, hands));
+            particles = particles.filter(particle => particle.update(deltaTime, controllerPos));
+            updateParticleCount();
             
             renderer.render(scene, camera);
         }
+        
+        // ========== EVENT HANDLERS ==========
+        function spawnText() {
+            const text = textInput.value.trim();
+            if (text) {
+                createTextParticles(text);
+                textInput.value = '';
+            }
+        }
+        
+        spawnBtn.addEventListener('click', spawnText);
+        
+        textInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                spawnText();
+            }
+        });
+        
+        document.querySelectorAll('.quick-word').forEach(btn => {
+            btn.addEventListener('click', () => {
+                createTextParticles(btn.dataset.word);
+            });
+        });
         
         // ========== START ==========
         init();
