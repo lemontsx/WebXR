@@ -16,8 +16,107 @@
             margin: 0;
             overflow: hidden;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
         
+        /* START SCREEN */
+        #start-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: 10000;
+            transition: opacity 0.5s ease;
+        }
+        
+        #start-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .start-container {
+            text-align: center;
+            padding: 40px;
+            max-width: 500px;
+        }
+        
+        .start-icon {
+            font-size: 80px;
+            color: white;
+            margin-bottom: 30px;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .start-title {
+            font-size: 48px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 16px;
+            letter-spacing: -1px;
+        }
+        
+        .start-subtitle {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+        
+        #enter-ar-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 20px 40px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+        
+        #enter-ar-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+        }
+        
+        #enter-ar-btn:active {
+            transform: translateY(-1px);
+        }
+        
+        #enter-ar-btn i {
+            font-size: 24px;
+        }
+        
+        .compatibility-message {
+            margin-top: 30px;
+            padding: 16px 24px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            color: white;
+            font-size: 14px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .error-message {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+        }
+        
+        /* MAIN UI PANEL */
         #ui-panel {
             position: absolute;
             top: 20px;
@@ -34,6 +133,11 @@
             cursor: move;
             user-select: none;
             transition: box-shadow 0.3s ease;
+            display: none;
+        }
+        
+        #ui-panel.active {
+            display: block;
         }
         
         #ui-panel:hover {
@@ -275,9 +379,33 @@
             color: rgba(255, 255, 255, 0.6);
             flex-shrink: 0;
         }
+        
+        canvas {
+            display: block;
+        }
     </style>
 </head>
 <body>
+    <!-- START SCREEN -->
+    <div id="start-screen">
+        <div class="start-container">
+            <div class="start-icon">
+                <i class="fa-solid fa-vr-cardboard"></i>
+            </div>
+            <h1 class="start-title">Sprint Timer</h1>
+            <p class="start-subtitle">Track your sprint times in mixed reality with your Quest 3</p>
+            <button id="enter-ar-btn">
+                <i class="fa-solid fa-play"></i>
+                <span>Enter AR Mode</span>
+            </button>
+            <div id="compatibility-info" class="compatibility-message">
+                <i class="fa-solid fa-circle-info"></i>
+                Checking WebXR support...
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN UI PANEL -->
     <div id="ui-panel">
         <div class="panel-header">
             <div class="panel-title">
@@ -334,16 +462,23 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
-        // ========== DRAGGABLE UI LOGIC ==========
+        // ========== DOM ELEMENTS ==========
+        const startScreen = document.getElementById('start-screen');
+        const enterArBtn = document.getElementById('enter-ar-btn');
+        const compatibilityInfo = document.getElementById('compatibility-info');
         const panel = document.getElementById('ui-panel');
         const dragHandle = document.querySelector('.drag-handle');
+        const statusEl = document.getElementById('status');
+        const statusText = document.getElementById('status-text');
+        const timerEl = document.getElementById('timer');
+        const startBtn = document.getElementById('startBtn');
+        const finishBtn = document.getElementById('finishBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        
+        // ========== DRAGGABLE UI LOGIC ==========
         let isDragging = false;
-        let currentX;
-        let currentY;
-        let initialX;
-        let initialY;
-        let xOffset = 0;
-        let yOffset = 0;
+        let currentX, currentY, initialX, initialY;
+        let xOffset = 0, yOffset = 0;
         
         function dragStart(e) {
             if (e.type === "touchstart") {
@@ -374,8 +509,7 @@
                 
                 xOffset = currentX;
                 yOffset = currentY;
-                
-                setTranslate(currentX, currentY, panel);
+                panel.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
             }
         }
         
@@ -384,10 +518,6 @@
             initialY = currentY;
             isDragging = false;
             panel.classList.remove('dragging');
-        }
-        
-        function setTranslate(xPos, yPos, el) {
-            el.style.transform = `translate3d(${xPos}px, ${yPos}px, 0)`;
         }
         
         panel.addEventListener("mousedown", dragStart);
@@ -408,15 +538,38 @@
         
         const ZONE_RADIUS = 0.4;
         
-        // ========== UI ELEMENTS ==========
-        const statusEl = document.getElementById('status');
-        const statusText = document.getElementById('status-text');
-        const timerEl = document.getElementById('timer');
-        const startBtn = document.getElementById('startBtn');
-        const finishBtn = document.getElementById('finishBtn');
-        const resetBtn = document.getElementById('resetBtn');
-        
         // ========== INITIALIZATION ==========
+        async function checkWebXRSupport() {
+            if (!navigator.xr) {
+                compatibilityInfo.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> WebXR not supported on this browser';
+                compatibilityInfo.classList.add('error-message');
+                enterArBtn.disabled = true;
+                enterArBtn.style.opacity = '0.5';
+                return false;
+            }
+            
+            try {
+                const supported = await navigator.xr.isSessionSupported('immersive-ar');
+                
+                if (supported) {
+                    compatibilityInfo.innerHTML = '<i class="fa-solid fa-circle-check"></i> WebXR AR supported - Ready to start!';
+                    return true;
+                } else {
+                    compatibilityInfo.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> AR mode not available on this device';
+                    compatibilityInfo.classList.add('error-message');
+                    enterArBtn.disabled = true;
+                    enterArBtn.style.opacity = '0.5';
+                    return false;
+                }
+            } catch (error) {
+                compatibilityInfo.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Error checking AR support';
+                compatibilityInfo.classList.add('error-message');
+                enterArBtn.disabled = true;
+                enterArBtn.style.opacity = '0.5';
+                return false;
+            }
+        }
+        
         function init() {
             scene = new THREE.Scene();
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -432,13 +585,6 @@
             const dirLight = new THREE.DirectionalLight(0xffffff, 0.5);
             dirLight.position.set(5, 10, 5);
             scene.add(dirLight);
-            
-            if (!navigator.xr) {
-                updateStatus('WebXR not supported', 'error');
-                return;
-            }
-            
-            startXRSession();
             
             startBtn.addEventListener('click', markStartPosition);
             finishBtn.addEventListener('click', markFinishPosition);
@@ -468,24 +614,31 @@
         // ========== WEBXR SESSION ==========
         async function startXRSession() {
             try {
-                const supported = await navigator.xr.isSessionSupported('immersive-ar');
-                
-                if (!supported) {
-                    updateStatus('AR not supported on this device', 'error');
-                    return;
-                }
-                
                 xrSession = await navigator.xr.requestSession('immersive-ar', {
                     requiredFeatures: ['local-floor'],
                     optionalFeatures: ['bounded-floor']
                 });
                 
                 await renderer.xr.setSession(xrSession);
-                updateStatus('AR Session Active - Mark start position', 'ready');
+                
+                // Hide start screen and show UI panel
+                startScreen.classList.add('hidden');
+                setTimeout(() => {
+                    startScreen.style.display = 'none';
+                    panel.classList.add('active');
+                }, 500);
+                
+                updateStatus('AR Active - Mark start position', 'ready');
+                
+                xrSession.addEventListener('end', () => {
+                    panel.classList.remove('active');
+                    startScreen.style.display = 'flex';
+                    startScreen.classList.remove('hidden');
+                });
                 
             } catch (error) {
                 console.error('Error starting XR session:', error);
-                updateStatus('Failed to start AR session', 'error');
+                alert('Failed to start AR session. Make sure you granted camera permissions and try again.');
             }
         }
         
@@ -673,13 +826,13 @@
         }
         
         // ========== START APPLICATION ==========
-        init();
+        checkWebXRSupport();
+        
+        enterArBtn.addEventListener('click', async () => {
+            init();
+            await startXRSession();
+        });
         
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-    </script>
-</body>
-</html>
