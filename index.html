@@ -789,3 +789,33 @@
             if (!currentGame) return;
             
             controllers.forEach((ctrl, idx) => {
+                const pos = new THREE.Vector3();
+                ctrl.grip.getWorldPosition(pos);
+                
+                if (currentGame.name === 'Fruit Ninja VR') {
+                    fruitNinjaState.fruits.forEach((fruit, i) => {
+                        if (fruit.position.distanceTo(pos) < 0.3) {
+                            scene.remove(fruit);
+                            fruitNinjaState.fruits.splice(i, 1);
+                            gameState.score += 10;
+                            gameState.combo++;
+                            updateUI();
+                        }
+                    });
+                } else if (currentGame.name === 'Boxing Arena') {
+                    boxingState.bags.forEach(bag => {
+                        if (bag.position.distanceTo(pos) < 0.4) {
+                            const now = Date.now();
+                            if (!boxingState.lastPunchTime[bag.userData.id] || now - boxingState.lastPunchTime[bag.userData.id] > 300) {
+                                bag.userData.swing = idx === 0 ? 0.3 : -0.3;
+                                bag.userData.hits++;
+                                gameState.score += 5;
+                                gameState.combo += 10;
+                                boxingState.lastPunchTime[bag.userData.id] = now;
+                                updateUI();
+                            }
+                        }
+                    });
+                }
+            });
+        }
