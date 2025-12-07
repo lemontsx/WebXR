@@ -613,13 +613,21 @@
         
         // ========== WEBXR SESSION ==========
         async function startXRSession() {
+            console.log('Starting XR session...');
+            enterArBtn.disabled = true;
+            enterArBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Starting AR...</span>';
+            
             try {
+                console.log('Requesting immersive-ar session...');
                 xrSession = await navigator.xr.requestSession('immersive-ar', {
                     requiredFeatures: ['local-floor'],
                     optionalFeatures: ['bounded-floor']
                 });
                 
+                console.log('XR session created successfully');
+                
                 await renderer.xr.setSession(xrSession);
+                console.log('Renderer XR session set');
                 
                 // Hide start screen and show UI panel
                 startScreen.classList.add('hidden');
@@ -631,14 +639,34 @@
                 updateStatus('AR Active - Mark start position', 'ready');
                 
                 xrSession.addEventListener('end', () => {
+                    console.log('XR session ended');
                     panel.classList.remove('active');
                     startScreen.style.display = 'flex';
                     startScreen.classList.remove('hidden');
+                    enterArBtn.disabled = false;
+                    enterArBtn.innerHTML = '<i class="fa-solid fa-play"></i> <span>Enter AR Mode</span>';
                 });
                 
             } catch (error) {
                 console.error('Error starting XR session:', error);
-                alert('Failed to start AR session. Make sure you granted camera permissions and try again.');
+                console.error('Error name:', error.name);
+                console.error('Error message:', error.message);
+                
+                enterArBtn.disabled = false;
+                enterArBtn.innerHTML = '<i class="fa-solid fa-play"></i> <span>Enter AR Mode</span>';
+                
+                let errorMsg = 'Failed to start AR session. ';
+                
+                if (error.name === 'NotAllowedError') {
+                    errorMsg += 'You need to allow camera access.';
+                } else if (error.name === 'SecurityError') {
+                    errorMsg += 'This page must be served over HTTPS.';
+                } else {
+                    errorMsg += 'Please try again. Error: ' + error.message;
+                }
+                
+                compatibilityInfo.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> ' + errorMsg;
+                compatibilityInfo.classList.add('error-message');
             }
         }
         
@@ -834,5 +862,9 @@
         });
         
         window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
+            if (camera && renderer) {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+        });
