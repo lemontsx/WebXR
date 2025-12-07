@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Voice Particle AR</title>
+    <title>Dodge & Punch AR</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -28,7 +28,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
             z-index: 10000;
         }
         
@@ -43,30 +43,32 @@
         }
         
         .start-icon {
-            font-size: 80px;
+            font-size: 100px;
             color: white;
             margin-bottom: 30px;
-            animation: float 3s ease-in-out infinite;
+            animation: bounce 2s ease-in-out infinite;
         }
         
-        @keyframes float {
+        @keyframes bounce {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
+            50% { transform: translateY(-30px); }
         }
         
         .start-title {
-            font-size: 48px;
-            font-weight: 700;
+            font-size: 56px;
+            font-weight: 900;
             color: white;
             margin-bottom: 16px;
-            letter-spacing: -1px;
+            letter-spacing: -2px;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
         }
         
         .start-subtitle {
-            font-size: 18px;
-            color: rgba(255, 255, 255, 0.9);
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.95);
             margin-bottom: 40px;
             line-height: 1.6;
+            font-weight: 500;
         }
         
         #enter-ar-btn {
@@ -74,178 +76,159 @@
             align-items: center;
             gap: 12px;
             background: white;
-            color: #667eea;
+            color: #dc2626;
             border: none;
-            padding: 20px 40px;
+            padding: 24px 48px;
             border-radius: 50px;
-            font-size: 18px;
-            font-weight: 700;
+            font-size: 22px;
+            font-weight: 800;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         
         #enter-ar-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
         }
         
         #enter-ar-btn i {
-            font-size: 24px;
+            font-size: 28px;
         }
         
-        .feature-list {
-            margin-top: 30px;
+        .rules {
+            margin-top: 40px;
             text-align: left;
             display: inline-block;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 24px 32px;
+            border-radius: 16px;
         }
         
-        .feature-item {
+        .rule-item {
             display: flex;
-            align-items: center;
-            gap: 12px;
+            align-items: flex-start;
+            gap: 16px;
             color: white;
             font-size: 16px;
-            margin: 12px 0;
+            margin: 16px 0;
+            line-height: 1.5;
         }
         
-        .feature-item i {
-            color: #ffd700;
-            font-size: 20px;
+        .rule-icon {
+            font-size: 24px;
+            min-width: 24px;
         }
         
-        #ui-panel {
+        .rule-icon.red { color: #ef4444; }
+        .rule-icon.green { color: #22c55e; }
+        .rule-icon.yellow { color: #eab308; }
+        
+        #game-ui {
             position: fixed;
-            bottom: 30px;
+            top: 30px;
             left: 50%;
             transform: translateX(-50%);
             background: rgba(15, 15, 25, 0.95);
             backdrop-filter: blur(20px);
             border: 2px solid rgba(255, 255, 255, 0.2);
             border-radius: 20px;
-            padding: 24px 32px;
+            padding: 20px 40px;
             z-index: 1000;
             display: none;
             flex-direction: column;
-            gap: 16px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
-            min-width: 400px;
-        }
-        
-        #ui-panel.active {
-            display: flex;
-        }
-        
-        .status-badge {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            padding: 12px 20px;
-            background: rgba(34, 197, 94, 0.2);
-            border: 1px solid rgba(34, 197, 94, 0.4);
-            border-radius: 30px;
-            color: #86efac;
-            font-size: 14px;
-            font-weight: 600;
-        }
-        
-        .status-badge i {
-            font-size: 18px;
-            animation: pulse 2s ease-in-out infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.6; transform: scale(1.1); }
-        }
-        
-        .input-section {
-            display: flex;
             gap: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+            min-width: 300px;
         }
         
-        #text-input {
-            flex: 1;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 12px;
-            padding: 14px 18px;
-            color: white;
-            font-size: 16px;
-            font-family: inherit;
-            outline: none;
-            transition: all 0.3s ease;
-        }
-        
-        #text-input::placeholder {
-            color: rgba(255, 255, 255, 0.4);
-        }
-        
-        #text-input:focus {
-            background: rgba(255, 255, 255, 0.12);
-            border-color: rgba(99, 102, 241, 0.5);
-        }
-        
-        #spawn-btn {
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-            border: none;
-            color: white;
-            padding: 14px 28px;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
+        #game-ui.active {
             display: flex;
-            align-items: center;
-            gap: 8px;
         }
         
-        #spawn-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
-        }
-        
-        #spawn-btn:active {
-            transform: translateY(0);
-        }
-        
-        .particle-count {
+        .score-display {
             text-align: center;
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 13px;
-            font-weight: 500;
-        }
-        
-        .particle-count span {
-            color: #6366f1;
-            font-weight: 700;
-            font-size: 16px;
-        }
-        
-        .quick-words {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        
-        .quick-word {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            color: rgba(255, 255, 255, 0.7);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .quick-word:hover {
-            background: rgba(255, 255, 255, 0.15);
+            font-size: 48px;
+            font-weight: 900;
             color: white;
-            transform: translateY(-2px);
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            font-family: 'Courier New', monospace;
+        }
+        
+        .lives-display {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            font-size: 32px;
+        }
+        
+        .heart {
+            color: #ef4444;
+            text-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+        }
+        
+        .heart.lost {
+            color: rgba(239, 68, 68, 0.2);
+        }
+        
+        #game-over {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(15, 15, 25, 0.98);
+            backdrop-filter: blur(30px);
+            border: 3px solid #ef4444;
+            border-radius: 24px;
+            padding: 48px 64px;
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+            box-shadow: 0 20px 80px rgba(239, 68, 68, 0.5);
+        }
+        
+        #game-over.active {
+            display: flex;
+        }
+        
+        .game-over-title {
+            font-size: 64px;
+            font-weight: 900;
+            color: #ef4444;
+            text-shadow: 0 0 30px rgba(239, 68, 68, 0.8);
+        }
+        
+        .final-score {
+            font-size: 32px;
+            color: white;
+            font-weight: 700;
+        }
+        
+        .final-score span {
+            color: #fbbf24;
+            font-size: 48px;
+        }
+        
+        #restart-btn {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            color: white;
+            border: none;
+            padding: 20px 48px;
+            border-radius: 50px;
+            font-size: 20px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+        
+        #restart-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(34, 197, 94, 0.5);
         }
         
         canvas {
@@ -257,226 +240,246 @@
     <div id="start-screen">
         <div class="start-container">
             <div class="start-icon">
-                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                <i class="fa-solid fa-hand-fist"></i>
             </div>
-            <h1 class="start-title">Particle Letters AR</h1>
-            <p class="start-subtitle">Type words and watch them materialize as floating particles. Touch them with your hands to scatter!</p>
+            <h1 class="start-title">DODGE & PUNCH</h1>
+            <p class="start-subtitle">Survive the onslaught! Dodge red balls or punch green ones!</p>
             <button id="enter-ar-btn">
-                <i class="fa-solid fa-play"></i>
-                <span>Start Experience</span>
+                <i class="fa-solid fa-gamepad"></i>
+                <span>Start Game</span>
             </button>
-            <div class="feature-list">
-                <div class="feature-item">
-                    <i class="fa-solid fa-keyboard"></i>
-                    <span>Type any word or phrase</span>
+            <div class="rules">
+                <div class="rule-item">
+                    <i class="fa-solid fa-circle rule-icon red"></i>
+                    <div><strong>RED CIRCLE → RED BALL:</strong> Deadly! Dodge or you die!</div>
                 </div>
-                <div class="feature-item">
-                    <i class="fa-solid fa-hand-sparkles"></i>
-                    <span>Swipe through particles to scatter</span>
+                <div class="rule-item">
+                    <i class="fa-solid fa-circle rule-icon green"></i>
+                    <div><strong>GREEN CIRCLE → GREEN BALL:</strong> Punch it for points!</div>
                 </div>
-                <div class="feature-item">
-                    <i class="fa-solid fa-eye"></i>
-                    <span>See your real environment</span>
+                <div class="rule-item">
+                    <i class="fa-solid fa-heart rule-icon yellow"></i>
+                    <div><strong>3 LIVES:</strong> Get hit by red = lose a life!</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="ui-panel">
-        <div class="status-badge">
-            <i class="fa-solid fa-circle-check"></i>
-            <span>AR MODE ACTIVE</span>
+    <div id="game-ui">
+        <div class="score-display" id="score">0</div>
+        <div class="lives-display" id="lives">
+            <i class="fa-solid fa-heart heart"></i>
+            <i class="fa-solid fa-heart heart"></i>
+            <i class="fa-solid fa-heart heart"></i>
         </div>
-        
-        <div class="input-section">
-            <input type="text" id="text-input" placeholder="Type a word or phrase..." maxlength="30">
-            <button id="spawn-btn">
-                <i class="fa-solid fa-sparkles"></i>
-                <span>Spawn</span>
-            </button>
-        </div>
-        
-        <div class="quick-words">
-            <button class="quick-word" data-word="HELLO">HELLO</button>
-            <button class="quick-word" data-word="COOL">COOL</button>
-            <button class="quick-word" data-word="AWESOME">AWESOME</button>
-            <button class="quick-word" data-word="WOW">WOW</button>
-        </div>
-        
-        <div class="particle-count">
-            Active Particles: <span id="particle-count">0</span>
-        </div>
+    </div>
+
+    <div id="game-over">
+        <div class="game-over-title">GAME OVER</div>
+        <div class="final-score">Final Score: <span id="final-score">0</span></div>
+        <button id="restart-btn">Play Again</button>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
-        // ========== GLOBAL STATE ==========
+        // ========== GAME STATE ==========
         let scene, camera, renderer, xrSession;
-        let particles = [];
+        let score = 0;
+        let lives = 3;
+        let gameActive = false;
+        let spawner = null;
+        let balls = [];
         let handMarkers = [];
         
         const startScreen = document.getElementById('start-screen');
         const enterArBtn = document.getElementById('enter-ar-btn');
-        const uiPanel = document.getElementById('ui-panel');
-        const textInput = document.getElementById('text-input');
-        const spawnBtn = document.getElementById('spawn-btn');
-        const particleCountEl = document.getElementById('particle-count');
+        const gameUI = document.getElementById('game-ui');
+        const gameOverScreen = document.getElementById('game-over');
+        const scoreEl = document.getElementById('score');
+        const livesEl = document.getElementById('lives');
+        const finalScoreEl = document.getElementById('final-score');
+        const restartBtn = document.getElementById('restart-btn');
         
-        // ========== PARTICLE SYSTEM ==========
-        class Particle {
-            constructor(x, y, z, char, color) {
-                this.char = char;
-                this.position = new THREE.Vector3(x, y, z);
-                this.velocity = new THREE.Vector3(0, 0, 0);
-                this.basePosition = new THREE.Vector3(x, y, z);
-                this.scattered = false;
-                this.life = 1.0;
-                this.color = color;
+        // ========== SPAWNER CIRCLE ==========
+        class Spawner {
+            constructor() {
+                this.group = new THREE.Group();
                 
-                // Create sprite for character
-                const canvas = document.createElement('canvas');
-                canvas.width = 128;
-                canvas.height = 128;
-                const ctx = canvas.getContext('2d');
-                
-                // Add glow effect
-                ctx.shadowBlur = 20;
-                ctx.shadowColor = color;
-                ctx.fillStyle = color;
-                ctx.font = 'bold 96px Arial';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(char, 64, 64);
-                
-                const texture = new THREE.CanvasTexture(canvas);
-                const material = new THREE.SpriteMaterial({ 
-                    map: texture, 
-                    transparent: true,
-                    opacity: 1,
-                    depthTest: false
+                // Outer ring
+                const ringGeo = new THREE.TorusGeometry(0.3, 0.04, 16, 32);
+                const ringMat = new THREE.MeshStandardMaterial({
+                    color: 0xffffff,
+                    emissive: 0xffffff,
+                    emissiveIntensity: 0.5
                 });
+                this.ring = new THREE.Mesh(ringGeo, ringMat);
+                this.group.add(this.ring);
                 
-                this.sprite = new THREE.Sprite(material);
-                this.sprite.scale.set(0.15, 0.15, 0.15);
-                this.sprite.position.copy(this.position);
+                // Inner circle (changes color)
+                const circleGeo = new THREE.CircleGeometry(0.25, 32);
+                const circleMat = new THREE.MeshStandardMaterial({
+                    color: 0xffffff,
+                    emissive: 0xffffff,
+                    emissiveIntensity: 0.8,
+                    transparent: true,
+                    opacity: 0.7,
+                    side: THREE.DoubleSide
+                });
+                this.circle = new THREE.Mesh(circleGeo, circleMat);
+                this.group.add(this.circle);
                 
-                scene.add(this.sprite);
+                this.isRed = false;
+                this.chargeTime = 0;
+                this.maxChargeTime = 2.0;
+                this.cooldown = 0;
+                
+                this.positionSpawner();
+                scene.add(this.group);
             }
             
-            update(deltaTime, controllerPositions) {
-                // Check collision with controllers
-                for (let ctrlPos of controllerPositions) {
-                    const dist = this.position.distanceTo(ctrlPos);
-                    if (dist < 0.2) { // 20cm collision radius
-                        this.scattered = true;
-                        const direction = new THREE.Vector3()
-                            .subVectors(this.position, ctrlPos)
-                            .normalize();
-                        this.velocity.add(direction.multiplyScalar(0.8));
-                    }
+            positionSpawner() {
+                const cameraPos = new THREE.Vector3();
+                camera.getWorldPosition(cameraPos);
+                const cameraDir = new THREE.Vector3();
+                camera.getWorldDirection(cameraDir);
+                
+                const spawnPos = cameraPos.clone().add(cameraDir.multiplyScalar(3));
+                spawnPos.y = cameraPos.y;
+                
+                this.group.position.copy(spawnPos);
+                this.group.lookAt(cameraPos);
+            }
+            
+            update(deltaTime) {
+                if (this.cooldown > 0) {
+                    this.cooldown -= deltaTime;
+                    this.circle.material.opacity = 0.3;
+                    return;
                 }
                 
-                if (this.scattered) {
-                    // Apply physics
-                    this.velocity.y -= 0.015; // Gravity
-                    this.velocity.multiplyScalar(0.97); // Drag
-                    this.position.add(this.velocity);
+                this.chargeTime += deltaTime;
+                const progress = this.chargeTime / this.maxChargeTime;
+                
+                if (progress >= 1.0) {
+                    this.shoot();
+                    this.chargeTime = 0;
+                    this.cooldown = 0.5;
+                    this.isRed = Math.random() > 0.5;
+                } else {
+                    // Pulse effect
+                    this.circle.material.opacity = 0.5 + progress * 0.5;
+                    this.circle.scale.set(1 + progress * 0.2, 1 + progress * 0.2, 1);
                     
-                    // Fade out
-                    this.life *= 0.98;
-                    this.sprite.material.opacity = this.life;
-                    
-                    // Remove if too far or faded
-                    if (this.life < 0.01 || this.position.y < -2) {
-                        scene.remove(this.sprite);
+                    // Set color
+                    const color = this.isRed ? 0xff0000 : 0x00ff00;
+                    this.circle.material.color.setHex(color);
+                    this.circle.material.emissive.setHex(color);
+                    this.ring.material.color.setHex(color);
+                }
+                
+                this.ring.rotation.z += deltaTime * 2;
+            }
+            
+            shoot() {
+                const direction = new THREE.Vector3();
+                this.group.getWorldDirection(direction);
+                direction.negate();
+                
+                const ball = new Ball(
+                    this.group.position.clone(),
+                    direction,
+                    this.isRed
+                );
+                balls.push(ball);
+            }
+        }
+        
+        // ========== BALL PROJECTILE ==========
+        class Ball {
+            constructor(position, direction, isRed) {
+                this.isRed = isRed;
+                this.speed = 2.5;
+                this.position = position.clone();
+                this.velocity = direction.clone().multiplyScalar(this.speed);
+                this.life = 10.0;
+                
+                const geometry = new THREE.SphereGeometry(0.1, 16, 16);
+                const material = new THREE.MeshStandardMaterial({
+                    color: isRed ? 0xff0000 : 0x00ff00,
+                    emissive: isRed ? 0xff0000 : 0x00ff00,
+                    emissiveIntensity: 0.8
+                });
+                this.mesh = new THREE.Mesh(geometry, material);
+                this.mesh.position.copy(this.position);
+                
+                // Add glow effect
+                const glowGeo = new THREE.SphereGeometry(0.15, 16, 16);
+                const glowMat = new THREE.MeshBasicMaterial({
+                    color: isRed ? 0xff0000 : 0x00ff00,
+                    transparent: true,
+                    opacity: 0.3
+                });
+                const glow = new THREE.Mesh(glowGeo, glowMat);
+                this.mesh.add(glow);
+                
+                scene.add(this.mesh);
+            }
+            
+            update(deltaTime, handPositions, headPosition) {
+                this.position.add(this.velocity.clone().multiplyScalar(deltaTime));
+                this.mesh.position.copy(this.position);
+                this.life -= deltaTime;
+                
+                // Check collision with head (death)
+                if (this.isRed) {
+                    const distToHead = this.position.distanceTo(headPosition);
+                    if (distToHead < 0.25) {
+                        loseLife();
+                        scene.remove(this.mesh);
                         return false;
                     }
-                } else {
-                    // Float gently
-                    const time = Date.now() * 0.001;
-                    this.position.y = this.basePosition.y + Math.sin(time * 2 + this.basePosition.x * 10) * 0.03;
-                    this.sprite.material.opacity = 0.8 + Math.sin(time * 3) * 0.2;
                 }
                 
-                this.sprite.position.copy(this.position);
+                // Check collision with hands
+                for (let handPos of handPositions) {
+                    const dist = this.position.distanceTo(handPos);
+                    if (dist < 0.15) {
+                        if (this.isRed) {
+                            // Punched a red ball - lose life
+                            loseLife();
+                        } else {
+                            // Punched a green ball - gain points
+                            addScore(10);
+                        }
+                        scene.remove(this.mesh);
+                        return false;
+                    }
+                }
+                
+                if (this.life <= 0) {
+                    scene.remove(this.mesh);
+                    return false;
+                }
+                
                 return true;
             }
         }
         
-        // ========== HAND VISUALIZATION ==========
+        // ========== HAND MARKERS ==========
         function createHandMarker() {
             const geometry = new THREE.SphereGeometry(0.08, 16, 16);
             const material = new THREE.MeshStandardMaterial({
                 color: 0x6366f1,
                 emissive: 0x6366f1,
-                emissiveIntensity: 0.5,
+                emissiveIntensity: 0.6,
                 transparent: true,
                 opacity: 0.8
             });
             const sphere = new THREE.Mesh(geometry, material);
-            
-            // Add ring around sphere
-            const ringGeometry = new THREE.TorusGeometry(0.1, 0.015, 16, 32);
-            const ringMaterial = new THREE.MeshStandardMaterial({
-                color: 0x8b5cf6,
-                emissive: 0x8b5cf6,
-                emissiveIntensity: 0.6
-            });
-            const ring = new THREE.Mesh(ringGeometry, ringMaterial);
-            ring.rotation.x = Math.PI / 2;
-            sphere.add(ring);
-            
             scene.add(sphere);
-            return { mesh: sphere, ring: ring };
+            return sphere;
         }
         
-        // ========== TEXT TO PARTICLES ==========
-        function createTextParticles(text) {
-            const cleanText = text.toUpperCase().trim();
-            if (!cleanText) return;
-            
-            console.log('Creating particles for:', cleanText);
-            
-            // Get camera position and direction
-            const cameraPos = new THREE.Vector3();
-            camera.getWorldPosition(cameraPos);
-            const cameraDir = new THREE.Vector3();
-            camera.getWorldDirection(cameraDir);
-            
-            // Position text in front of camera
-            const textPos = cameraPos.clone().add(cameraDir.multiplyScalar(1.5));
-            textPos.y += 0.2; // Slightly above center
-            
-            const colors = ['#6366f1', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'];
-            const charSpacing = 0.15;
-            const totalWidth = cleanText.length * charSpacing;
-            const startX = -totalWidth / 2;
-            
-            for (let i = 0; i < cleanText.length; i++) {
-                const char = cleanText[i];
-                if (char === ' ') continue;
-                
-                const localX = startX + i * charSpacing;
-                const localY = (Math.random() - 0.5) * 0.08;
-                const localZ = (Math.random() - 0.5) * 0.08;
-                
-                // Transform to world space
-                const worldPos = new THREE.Vector3(localX, localY, localZ);
-                worldPos.applyQuaternion(camera.quaternion);
-                worldPos.add(textPos);
-                
-                const color = colors[i % colors.length];
-                particles.push(new Particle(worldPos.x, worldPos.y, worldPos.z, char, color));
-            }
-            
-            updateParticleCount();
-        }
-        
-        function updateParticleCount() {
-            particleCountEl.textContent = particles.length;
-        }
-        
-        // ========== CONTROLLER TRACKING ==========
         function getControllerPositions() {
             const positions = [];
             
@@ -496,25 +499,84 @@
                         );
                         positions.push(pos);
                         
-                        // Update hand marker
                         if (handMarkers.length < positions.length) {
                             handMarkers.push(createHandMarker());
                         }
                         
                         const marker = handMarkers[positions.length - 1];
-                        marker.mesh.position.copy(pos);
-                        marker.mesh.visible = true;
-                        marker.ring.rotation.z += 0.05;
+                        marker.position.copy(pos);
+                        marker.visible = true;
                     }
                 }
             }
             
-            // Hide unused markers
             for (let i = positions.length; i < handMarkers.length; i++) {
-                handMarkers[i].mesh.visible = false;
+                handMarkers[i].visible = false;
             }
             
             return positions;
+        }
+        
+        // ========== GAME LOGIC ==========
+        function startGame() {
+            score = 0;
+            lives = 3;
+            gameActive = true;
+            balls = [];
+            
+            updateScore();
+            updateLives();
+            
+            gameOverScreen.classList.remove('active');
+            
+            if (!spawner) {
+                spawner = new Spawner();
+            } else {
+                spawner.positionSpawner();
+                spawner.chargeTime = 0;
+                spawner.cooldown = 0;
+            }
+        }
+        
+        function addScore(points) {
+            score += points;
+            updateScore();
+        }
+        
+        function updateScore() {
+            scoreEl.textContent = score;
+        }
+        
+        function loseLife() {
+            if (!gameActive) return;
+            
+            lives--;
+            updateLives();
+            
+            if (lives <= 0) {
+                endGame();
+            }
+        }
+        
+        function updateLives() {
+            const hearts = livesEl.querySelectorAll('.heart');
+            hearts.forEach((heart, index) => {
+                if (index < lives) {
+                    heart.classList.remove('lost');
+                } else {
+                    heart.classList.add('lost');
+                }
+            });
+        }
+        
+        function endGame() {
+            gameActive = false;
+            finalScoreEl.textContent = score;
+            gameOverScreen.classList.add('active');
+            
+            // Clear balls
+            balls.forEach(ball => scene.remove(ball.mesh));
+            balls = [];
         }
         
         // ========== THREE.JS SETUP ==========
@@ -549,34 +611,30 @@
                     optionalFeatures: ['hand-tracking', 'bounded-floor']
                 });
                 
-                console.log('✅ XR session started successfully!');
+                console.log('XR session started!');
                 
                 await renderer.xr.setSession(xrSession);
                 
                 startScreen.classList.add('hidden');
-                uiPanel.classList.add('active');
+                gameUI.classList.add('active');
                 
-                // Auto-spawn welcome message
-                setTimeout(() => {
-                    createTextParticles('WELCOME');
-                }, 1000);
+                startGame();
                 
                 xrSession.addEventListener('end', () => {
                     console.log('XR session ended');
-                    uiPanel.classList.remove('active');
+                    gameUI.classList.remove('active');
+                    gameOverScreen.classList.remove('active');
                     startScreen.classList.remove('hidden');
                     enterArBtn.disabled = false;
-                    enterArBtn.innerHTML = '<i class="fa-solid fa-play"></i> <span>Start Experience</span>';
-                    particles = [];
-                    handMarkers.forEach(m => scene.remove(m.mesh));
-                    handMarkers = [];
+                    enterArBtn.innerHTML = '<i class="fa-solid fa-gamepad"></i> <span>Start Game</span>';
+                    gameActive = false;
                 });
                 
             } catch (error) {
-                console.error('❌ XR session error:', error);
-                alert('Failed to start AR: ' + error.message + '\n\nMake sure you:\n1. Allowed camera access\n2. Are using Quest Browser\n3. Have a clear play area');
+                console.error('XR error:', error);
+                alert('Failed to start AR: ' + error.message);
                 enterArBtn.disabled = false;
-                enterArBtn.innerHTML = '<i class="fa-solid fa-play"></i> <span>Start Experience</span>';
+                enterArBtn.innerHTML = '<i class="fa-solid fa-gamepad"></i> <span>Start Game</span>';
             }
         }
         
@@ -586,42 +644,30 @@
             const deltaTime = (time - lastTime) / 1000;
             lastTime = time;
             
-            const controllerPos = getControllerPositions();
+            if (!gameActive) {
+                renderer.render(scene, camera);
+                return;
+            }
             
-            // Update all particles
-            particles = particles.filter(particle => particle.update(deltaTime, controllerPos));
-            updateParticleCount();
+            const handPos = getControllerPositions();
+            
+            const headPos = new THREE.Vector3();
+            camera.getWorldPosition(headPos);
+            
+            if (spawner) {
+                spawner.update(deltaTime);
+            }
+            
+            balls = balls.filter(ball => ball.update(deltaTime, handPos, headPos));
             
             renderer.render(scene, camera);
         }
         
         // ========== EVENT HANDLERS ==========
-        function spawnText() {
-            const text = textInput.value.trim();
-            if (text) {
-                createTextParticles(text);
-                textInput.value = '';
-            }
-        }
-        
-        spawnBtn.addEventListener('click', spawnText);
-        
-        textInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                spawnText();
-            }
-        });
-        
-        document.querySelectorAll('.quick-word').forEach(btn => {
-            btn.addEventListener('click', () => {
-                createTextParticles(btn.dataset.word);
-            });
-        });
-        
-        // ========== START ==========
-        init();
-        
         enterArBtn.addEventListener('click', startXRSession);
+        restartBtn.addEventListener('click', startGame);
+        
+        init();
         
         window.addEventListener('resize', () => {
             if (camera && renderer) {
