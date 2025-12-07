@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebXR Sprint Timer</title>
+    <title>Voice Particle AR</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -16,10 +16,9 @@
             margin: 0;
             overflow: hidden;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #000;
         }
         
-        /* START SCREEN */
         #start-screen {
             position: fixed;
             top: 0;
@@ -31,18 +30,16 @@
             justify-content: center;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             z-index: 10000;
-            transition: opacity 0.5s ease;
         }
         
         #start-screen.hidden {
-            opacity: 0;
-            pointer-events: none;
+            display: none;
         }
         
         .start-container {
             text-align: center;
             padding: 40px;
-            max-width: 500px;
+            max-width: 600px;
         }
         
         .start-icon {
@@ -67,7 +64,7 @@
         
         .start-subtitle {
             font-size: 18px;
-            color: rgba(255, 255, 255, 0.8);
+            color: rgba(255, 255, 255, 0.9);
             margin-bottom: 40px;
             line-height: 1.6;
         }
@@ -93,291 +90,82 @@
             box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
         }
         
-        #enter-ar-btn:active {
-            transform: translateY(-1px);
-        }
-        
         #enter-ar-btn i {
             font-size: 24px;
         }
         
-        .compatibility-message {
+        .feature-list {
             margin-top: 30px;
-            padding: 16px 24px;
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 12px;
+            text-align: left;
+            display: inline-block;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
             color: white;
-            font-size: 14px;
-            backdrop-filter: blur(10px);
+            font-size: 16px;
+            margin: 12px 0;
         }
         
-        .error-message {
-            background: rgba(239, 68, 68, 0.2);
-            border: 1px solid rgba(239, 68, 68, 0.4);
+        .feature-item i {
+            color: #ffd700;
+            font-size: 20px;
         }
         
-        /* MAIN UI PANEL */
-        #ui-panel {
-            position: absolute;
-            top: 20px;
-            left: 20px;
+        #ui-overlay {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
             background: rgba(15, 15, 25, 0.92);
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 24px;
-            min-width: 320px;
-            max-width: 400px;
+            border-radius: 50px;
+            padding: 20px 40px;
             z-index: 1000;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-            cursor: move;
-            user-select: none;
-            transition: box-shadow 0.3s ease;
             display: none;
-        }
-        
-        #ui-panel.active {
-            display: block;
-        }
-        
-        #ui-panel:hover {
-            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.6);
-        }
-        
-        #ui-panel.dragging {
-            cursor: grabbing;
-            box-shadow: 0 16px 64px rgba(0, 0, 0, 0.8);
-        }
-        
-        .panel-header {
-            display: flex;
             align-items: center;
-            justify-content: space-between;
-            margin-bottom: 20px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            gap: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
         }
         
-        .panel-title {
+        #ui-overlay.active {
+            display: flex;
+        }
+        
+        .voice-status {
             display: flex;
             align-items: center;
             gap: 12px;
-            font-size: 20px;
+            color: white;
+            font-size: 16px;
             font-weight: 600;
-            color: #fff;
-            letter-spacing: -0.5px;
         }
         
-        .panel-title i {
-            color: #6366f1;
+        .voice-icon {
             font-size: 24px;
+            color: #667eea;
         }
         
-        .drag-handle {
-            color: rgba(255, 255, 255, 0.3);
-            font-size: 18px;
-            cursor: grab;
-        }
-        
-        .drag-handle:active {
-            cursor: grabbing;
-        }
-        
-        .warning-badge {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(239, 68, 68, 0.15);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            border-radius: 8px;
-            padding: 10px 14px;
-            margin-bottom: 20px;
-            color: #fca5a5;
-            font-size: 13px;
-            font-weight: 500;
-        }
-        
-        .warning-badge i {
-            font-size: 16px;
-            color: #ef4444;
-        }
-        
-        #status {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 14px 16px;
-            background: rgba(99, 102, 241, 0.12);
-            border: 1px solid rgba(99, 102, 241, 0.25);
-            border-radius: 10px;
-            color: #a5b4fc;
-            font-size: 14px;
-            font-weight: 500;
-            margin-bottom: 16px;
-            transition: all 0.3s ease;
-        }
-        
-        #status i {
-            font-size: 16px;
-            color: #818cf8;
-        }
-        
-        #status.ready {
-            background: rgba(34, 197, 94, 0.12);
-            border-color: rgba(34, 197, 94, 0.25);
-            color: #86efac;
-        }
-        
-        #status.ready i {
+        .voice-icon.listening {
             color: #22c55e;
-        }
-        
-        #status.running {
-            background: rgba(234, 179, 8, 0.12);
-            border-color: rgba(234, 179, 8, 0.25);
-            color: #fde047;
-            animation: pulse 2s ease-in-out infinite;
-        }
-        
-        #status.running i {
-            color: #eab308;
-        }
-        
-        #status.finished {
-            background: rgba(168, 85, 247, 0.12);
-            border-color: rgba(168, 85, 247, 0.25);
-            color: #d8b4fe;
-        }
-        
-        #status.finished i {
-            color: #a855f7;
+            animation: pulse 1.5s ease-in-out infinite;
         }
         
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
         }
         
-        #timer {
-            text-align: center;
-            font-size: 56px;
-            font-weight: 700;
-            color: #fff;
-            margin: 24px 0;
-            font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
-            letter-spacing: -2px;
-            text-shadow: 0 0 30px rgba(99, 102, 241, 0.5);
-            min-height: 70px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .button-grid {
-            display: grid;
-            gap: 10px;
-            margin-bottom: 16px;
-        }
-        
-        button {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            color: #fff;
-            padding: 14px 20px;
-            border-radius: 10px;
+        #transcript {
+            color: rgba(255, 255, 255, 0.7);
             font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-family: inherit;
-        }
-        
-        button:hover:not(:disabled) {
-            background: rgba(255, 255, 255, 0.12);
-            border-color: rgba(255, 255, 255, 0.2);
-            transform: translateY(-1px);
-        }
-        
-        button:active:not(:disabled) {
-            transform: translateY(0);
-        }
-        
-        button:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
-        
-        button i {
-            font-size: 16px;
-        }
-        
-        #startBtn {
-            background: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(22, 163, 74, 0.2) 100%);
-            border-color: rgba(34, 197, 94, 0.3);
-            color: #86efac;
-        }
-        
-        #startBtn:hover:not(:disabled) {
-            background: linear-gradient(135deg, rgba(34, 197, 94, 0.3) 0%, rgba(22, 163, 74, 0.3) 100%);
-            border-color: rgba(34, 197, 94, 0.5);
-        }
-        
-        #finishBtn {
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(220, 38, 38, 0.2) 100%);
-            border-color: rgba(239, 68, 68, 0.3);
-            color: #fca5a5;
-        }
-        
-        #finishBtn:hover:not(:disabled) {
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.3) 0%, rgba(220, 38, 38, 0.3) 100%);
-            border-color: rgba(239, 68, 68, 0.5);
-        }
-        
-        #resetBtn {
-            background: linear-gradient(135deg, rgba(100, 116, 139, 0.2) 0%, rgba(71, 85, 105, 0.2) 100%);
-            border-color: rgba(100, 116, 139, 0.3);
-            color: #cbd5e1;
-        }
-        
-        #resetBtn:hover:not(:disabled) {
-            background: linear-gradient(135deg, rgba(100, 116, 139, 0.3) 0%, rgba(71, 85, 105, 0.3) 100%);
-            border-color: rgba(100, 116, 139, 0.5);
-        }
-        
-        .instructions {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            padding-top: 16px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .instruction-step {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 12px;
-            font-weight: 500;
-        }
-        
-        .step-number {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 24px;
-            height: 24px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 700;
-            color: rgba(255, 255, 255, 0.6);
-            flex-shrink: 0;
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         
         canvas {
@@ -386,190 +174,241 @@
     </style>
 </head>
 <body>
-    <!-- START SCREEN -->
     <div id="start-screen">
         <div class="start-container">
             <div class="start-icon">
-                <i class="fa-solid fa-vr-cardboard"></i>
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
             </div>
-            <h1 class="start-title">Sprint Timer</h1>
-            <p class="start-subtitle">Track your sprint times in mixed reality with your Quest 3</p>
+            <h1 class="start-title">Voice Particles AR</h1>
+            <p class="start-subtitle">Speak words and watch them materialize as particles in your space. Touch them with your hands to scatter!</p>
             <button id="enter-ar-btn">
                 <i class="fa-solid fa-play"></i>
-                <span>Enter AR Mode</span>
+                <span>Start Experience</span>
             </button>
-            <div id="compatibility-info" class="compatibility-message">
-                <i class="fa-solid fa-circle-info"></i>
-                Checking WebXR support...
+            <div class="feature-list">
+                <div class="feature-item">
+                    <i class="fa-solid fa-microphone"></i>
+                    <span>Speak any word</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fa-solid fa-hand-sparkles"></i>
+                    <span>Touch particles to scatter them</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fa-solid fa-eye"></i>
+                    <span>Passthrough AR - see your real world</span>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- MAIN UI PANEL -->
-    <div id="ui-panel">
-        <div class="panel-header">
-            <div class="panel-title">
-                <i class="fa-solid fa-stopwatch"></i>
-                <span>Sprint Timer</span>
-            </div>
-            <div class="drag-handle">
-                <i class="fa-solid fa-grip-vertical"></i>
-            </div>
+    <div id="ui-overlay">
+        <div class="voice-status">
+            <i class="fa-solid fa-microphone voice-icon" id="voice-icon"></i>
+            <span id="voice-text">Say something...</span>
         </div>
-        
-        <div class="warning-badge">
-            <i class="fa-solid fa-triangle-exclamation"></i>
-            <span>Clear your play area before running</span>
-        </div>
-        
-        <div id="status">
-            <i class="fa-solid fa-circle-info"></i>
-            <span id="status-text">Ready to set up course</span>
-        </div>
-        
-        <div id="timer"></div>
-        
-        <div class="button-grid">
-            <button id="startBtn">
-                <i class="fa-solid fa-flag"></i>
-                <span>Mark Start Position</span>
-            </button>
-            <button id="finishBtn" disabled>
-                <i class="fa-solid fa-flag-checkered"></i>
-                <span>Mark Finish Position</span>
-            </button>
-            <button id="resetBtn">
-                <i class="fa-solid fa-arrow-rotate-left"></i>
-                <span>Reset Course</span>
-            </button>
-        </div>
-        
-        <div class="instructions">
-            <div class="instruction-step">
-                <div class="step-number">1</div>
-                <span>Mark start position</span>
-            </div>
-            <div class="instruction-step">
-                <div class="step-number">2</div>
-                <span>Walk to finish and mark it</span>
-            </div>
-            <div class="instruction-step">
-                <div class="step-number">3</div>
-                <span>Return to start and sprint</span>
-            </div>
-        </div>
+        <div id="transcript"></div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
-        // ========== DOM ELEMENTS ==========
+        // ========== GLOBAL STATE ==========
+        let scene, camera, renderer, xrSession;
+        let recognition;
+        let particles = [];
+        let hands = [];
+        
         const startScreen = document.getElementById('start-screen');
         const enterArBtn = document.getElementById('enter-ar-btn');
-        const compatibilityInfo = document.getElementById('compatibility-info');
-        const panel = document.getElementById('ui-panel');
-        const dragHandle = document.querySelector('.drag-handle');
-        const statusEl = document.getElementById('status');
-        const statusText = document.getElementById('status-text');
-        const timerEl = document.getElementById('timer');
-        const startBtn = document.getElementById('startBtn');
-        const finishBtn = document.getElementById('finishBtn');
-        const resetBtn = document.getElementById('resetBtn');
+        const uiOverlay = document.getElementById('ui-overlay');
+        const voiceIcon = document.getElementById('voice-icon');
+        const voiceText = document.getElementById('voice-text');
+        const transcriptEl = document.getElementById('transcript');
         
-        // ========== DRAGGABLE UI LOGIC ==========
-        let isDragging = false;
-        let currentX, currentY, initialX, initialY;
-        let xOffset = 0, yOffset = 0;
-        
-        function dragStart(e) {
-            if (e.type === "touchstart") {
-                initialX = e.touches[0].clientX - xOffset;
-                initialY = e.touches[0].clientY - yOffset;
-            } else {
-                initialX = e.clientX - xOffset;
-                initialY = e.clientY - yOffset;
+        // ========== PARTICLE SYSTEM ==========
+        class Particle {
+            constructor(x, y, z, char) {
+                this.char = char;
+                this.position = new THREE.Vector3(x, y, z);
+                this.velocity = new THREE.Vector3(0, 0, 0);
+                this.basePosition = new THREE.Vector3(x, y, z);
+                this.scattered = false;
+                
+                // Create sprite for character
+                const canvas = document.createElement('canvas');
+                canvas.width = 64;
+                canvas.height = 64;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 48px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(char, 32, 32);
+                
+                const texture = new THREE.CanvasTexture(canvas);
+                const material = new THREE.SpriteMaterial({ 
+                    map: texture, 
+                    transparent: true,
+                    opacity: 1
+                });
+                
+                this.sprite = new THREE.Sprite(material);
+                this.sprite.scale.set(0.1, 0.1, 0.1);
+                this.sprite.position.copy(this.position);
+                
+                scene.add(this.sprite);
             }
             
-            if (e.target === dragHandle || e.target.closest('.drag-handle') || e.target === panel.querySelector('.panel-header')) {
-                isDragging = true;
-                panel.classList.add('dragging');
-            }
-        }
-        
-        function drag(e) {
-            if (isDragging) {
-                e.preventDefault();
-                
-                if (e.type === "touchmove") {
-                    currentX = e.touches[0].clientX - initialX;
-                    currentY = e.touches[0].clientY - initialY;
-                } else {
-                    currentX = e.clientX - initialX;
-                    currentY = e.clientY - initialY;
+            update(deltaTime, handPositions) {
+                // Check collision with hands
+                for (let handPos of handPositions) {
+                    const dist = this.position.distanceTo(handPos);
+                    if (dist < 0.15) { // 15cm collision radius
+                        this.scattered = true;
+                        const direction = new THREE.Vector3()
+                            .subVectors(this.position, handPos)
+                            .normalize();
+                        this.velocity.add(direction.multiplyScalar(0.5));
+                    }
                 }
                 
-                xOffset = currentX;
-                yOffset = currentY;
-                panel.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
+                if (this.scattered) {
+                    // Apply physics
+                    this.velocity.y -= 0.01; // Gravity
+                    this.velocity.multiplyScalar(0.98); // Drag
+                    this.position.add(this.velocity);
+                    
+                    // Fade out
+                    this.sprite.material.opacity *= 0.99;
+                    
+                    // Remove if too far or faded
+                    if (this.sprite.material.opacity < 0.01 || 
+                        this.position.distanceTo(this.basePosition) > 5) {
+                        scene.remove(this.sprite);
+                        return false;
+                    }
+                } else {
+                    // Float gently
+                    const time = Date.now() * 0.001;
+                    this.position.y = this.basePosition.y + Math.sin(time + this.basePosition.x * 5) * 0.02;
+                }
+                
+                this.sprite.position.copy(this.position);
+                return true;
             }
         }
         
-        function dragEnd(e) {
-            initialX = currentX;
-            initialY = currentY;
-            isDragging = false;
-            panel.classList.remove('dragging');
-        }
-        
-        panel.addEventListener("mousedown", dragStart);
-        panel.addEventListener("touchstart", dragStart);
-        document.addEventListener("mousemove", drag);
-        document.addEventListener("touchmove", drag);
-        document.addEventListener("mouseup", dragEnd);
-        document.addEventListener("touchend", dragEnd);
-        
-        // ========== GAME STATE ==========
-        let scene, camera, renderer, xrSession;
-        let startMarker = null, finishMarker = null;
-        let startPos = null, finishPos = null;
-        let isInStartZone = false;
-        let isRunning = false;
-        let startTime = null;
-        let finalTime = null;
-        
-        const ZONE_RADIUS = 0.4;
-        
-        // ========== INITIALIZATION ==========
-        async function checkWebXRSupport() {
-            if (!navigator.xr) {
-                compatibilityInfo.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> WebXR not supported on this browser';
-                compatibilityInfo.classList.add('error-message');
-                enterArBtn.disabled = true;
-                enterArBtn.style.opacity = '0.5';
-                return false;
+        // ========== TEXT TO PARTICLES ==========
+        function createTextParticles(text) {
+            const cleanText = text.toUpperCase().trim();
+            if (!cleanText) return;
+            
+            console.log('Creating particles for:', cleanText);
+            
+            // Position in front of user
+            const cameraPos = new THREE.Vector3();
+            camera.getWorldPosition(cameraPos);
+            const cameraDir = new THREE.Vector3();
+            camera.getWorldDirection(cameraDir);
+            
+            const textPos = cameraPos.clone().add(cameraDir.multiplyScalar(1.5));
+            textPos.y += 0.3; // Slightly above eye level
+            
+            const charSpacing = 0.12;
+            const totalWidth = cleanText.length * charSpacing;
+            const startX = textPos.x - totalWidth / 2;
+            
+            for (let i = 0; i < cleanText.length; i++) {
+                const char = cleanText[i];
+                if (char === ' ') continue;
+                
+                const x = startX + i * charSpacing;
+                const y = textPos.y + (Math.random() - 0.5) * 0.05;
+                const z = textPos.z + (Math.random() - 0.5) * 0.05;
+                
+                particles.push(new Particle(x, y, z, char));
             }
             
-            try {
-                const supported = await navigator.xr.isSessionSupported('immersive-ar');
+            console.log('Total particles:', particles.length);
+        }
+        
+        // ========== VOICE RECOGNITION ==========
+        function setupVoiceRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            
+            if (!SpeechRecognition) {
+                console.error('Speech recognition not supported');
+                voiceText.textContent = 'Voice not supported';
+                return;
+            }
+            
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+            
+            recognition.onstart = () => {
+                console.log('Voice recognition started');
+                voiceIcon.classList.add('listening');
+                voiceText.textContent = 'Listening...';
+            };
+            
+            recognition.onresult = (event) => {
+                const last = event.results.length - 1;
+                const result = event.results[last];
+                const transcript = result[0].transcript;
                 
-                if (supported) {
-                    compatibilityInfo.innerHTML = '<i class="fa-solid fa-circle-check"></i> WebXR AR supported - Ready to start!';
-                    return true;
-                } else {
-                    compatibilityInfo.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> AR mode not available on this device';
-                    compatibilityInfo.classList.add('error-message');
-                    enterArBtn.disabled = true;
-                    enterArBtn.style.opacity = '0.5';
-                    return false;
+                transcriptEl.textContent = transcript;
+                
+                if (result.isFinal) {
+                    console.log('Final transcript:', transcript);
+                    createTextParticles(transcript);
+                    transcriptEl.textContent = '';
                 }
-            } catch (error) {
-                compatibilityInfo.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Error checking AR support';
-                compatibilityInfo.classList.add('error-message');
-                enterArBtn.disabled = true;
-                enterArBtn.style.opacity = '0.5';
-                return false;
+            };
+            
+            recognition.onerror = (event) => {
+                console.error('Speech recognition error:', event.error);
+                if (event.error === 'not-allowed') {
+                    voiceText.textContent = 'Microphone access denied';
+                }
+            };
+            
+            recognition.onend = () => {
+                console.log('Voice recognition ended, restarting...');
+                if (xrSession) {
+                    setTimeout(() => recognition.start(), 100);
+                }
+            };
+            
+            recognition.start();
+        }
+        
+        // ========== HAND TRACKING ==========
+        function updateHandPositions() {
+            hands = [];
+            
+            if (!xrSession || !xrSession.inputSources) return;
+            
+            for (const source of xrSession.inputSources) {
+                if (source.hand) {
+                    // Get hand joint positions
+                    const indexTip = source.hand.get('index-finger-tip');
+                    if (indexTip) {
+                        const pose = xrSession.frame?.getPose(indexTip, xrSession.referenceSpace);
+                        if (pose) {
+                            hands.push(new THREE.Vector3(
+                                pose.transform.position.x,
+                                pose.transform.position.y,
+                                pose.transform.position.z
+                            ));
+                        }
+                    }
+                }
             }
         }
         
+        // ========== THREE.JS SETUP ==========
         function init() {
             scene = new THREE.Scene();
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -579,287 +418,64 @@
             renderer.xr.enabled = true;
             document.body.appendChild(renderer.domElement);
             
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+            const ambientLight = new THREE.AmbientLight(0xffffff, 1);
             scene.add(ambientLight);
-            
-            const dirLight = new THREE.DirectionalLight(0xffffff, 0.5);
-            dirLight.position.set(5, 10, 5);
-            scene.add(dirLight);
-            
-            startBtn.addEventListener('click', markStartPosition);
-            finishBtn.addEventListener('click', markFinishPosition);
-            resetBtn.addEventListener('click', resetCourse);
             
             renderer.setAnimationLoop(render);
         }
         
-        // ========== STATUS UPDATES ==========
-        function updateStatus(text, type = 'info') {
-            statusText.textContent = text;
-            statusEl.className = '';
-            statusEl.classList.add(type);
-            
-            const icons = {
-                info: 'fa-circle-info',
-                ready: 'fa-circle-check',
-                running: 'fa-person-running',
-                finished: 'fa-trophy',
-                error: 'fa-circle-exclamation'
-            };
-            
-            const icon = statusEl.querySelector('i');
-            icon.className = `fa-solid ${icons[type] || icons.info}`;
-        }
-        
-        // ========== WEBXR SESSION ==========
+        // ========== XR SESSION ==========
         async function startXRSession() {
             console.log('Starting XR session...');
-            enterArBtn.disabled = true;
-            enterArBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Starting AR...</span>';
             
             try {
-                console.log('Requesting immersive-ar session...');
                 xrSession = await navigator.xr.requestSession('immersive-ar', {
                     requiredFeatures: ['local-floor'],
-                    optionalFeatures: ['bounded-floor']
+                    optionalFeatures: ['hand-tracking']
                 });
                 
-                console.log('XR session created successfully');
+                console.log('XR session created');
                 
                 await renderer.xr.setSession(xrSession);
-                console.log('Renderer XR session set');
                 
-                // Hide start screen and show UI panel
                 startScreen.classList.add('hidden');
-                setTimeout(() => {
-                    startScreen.style.display = 'none';
-                    panel.classList.add('active');
-                }, 500);
+                uiOverlay.classList.add('active');
                 
-                updateStatus('AR Active - Mark start position', 'ready');
+                setupVoiceRecognition();
                 
                 xrSession.addEventListener('end', () => {
                     console.log('XR session ended');
-                    panel.classList.remove('active');
-                    startScreen.style.display = 'flex';
+                    if (recognition) {
+                        recognition.stop();
+                    }
+                    uiOverlay.classList.remove('active');
                     startScreen.classList.remove('hidden');
-                    enterArBtn.disabled = false;
-                    enterArBtn.innerHTML = '<i class="fa-solid fa-play"></i> <span>Enter AR Mode</span>';
                 });
                 
             } catch (error) {
-                console.error('Error starting XR session:', error);
-                console.error('Error name:', error.name);
-                console.error('Error message:', error.message);
-                
-                enterArBtn.disabled = false;
-                enterArBtn.innerHTML = '<i class="fa-solid fa-play"></i> <span>Enter AR Mode</span>';
-                
-                let errorMsg = 'Failed to start AR session. ';
-                
-                if (error.name === 'NotAllowedError') {
-                    errorMsg += 'You need to allow camera access.';
-                } else if (error.name === 'SecurityError') {
-                    errorMsg += 'This page must be served over HTTPS.';
-                } else {
-                    errorMsg += 'Please try again. Error: ' + error.message;
-                }
-                
-                compatibilityInfo.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> ' + errorMsg;
-                compatibilityInfo.classList.add('error-message');
+                console.error('XR session error:', error);
+                alert('Failed to start AR. Error: ' + error.message);
             }
-        }
-        
-        // ========== MARKER CREATION ==========
-        function createMarker(color) {
-            const group = new THREE.Group();
-            
-            const geometry = new THREE.CylinderGeometry(ZONE_RADIUS, ZONE_RADIUS, 0.05, 32);
-            const material = new THREE.MeshStandardMaterial({
-                color: color,
-                transparent: true,
-                opacity: 0.7,
-                emissive: color,
-                emissiveIntensity: 0.3
-            });
-            const cylinder = new THREE.Mesh(geometry, material);
-            cylinder.position.y = 0.025;
-            group.add(cylinder);
-            
-            const ringGeometry = new THREE.TorusGeometry(ZONE_RADIUS, 0.02, 16, 32);
-            const ringMaterial = new THREE.MeshStandardMaterial({
-                color: color,
-                emissive: color,
-                emissiveIntensity: 0.5
-            });
-            const ring = new THREE.Mesh(ringGeometry, ringMaterial);
-            ring.rotation.x = Math.PI / 2;
-            ring.position.y = 0.05;
-            group.add(ring);
-            
-            const beamGeometry = new THREE.CylinderGeometry(0.03, 0.03, 2, 16);
-            const beamMaterial = new THREE.MeshStandardMaterial({
-                color: color,
-                transparent: true,
-                opacity: 0.5,
-                emissive: color,
-                emissiveIntensity: 0.5
-            });
-            const beam = new THREE.Mesh(beamGeometry, beamMaterial);
-            beam.position.y = 1;
-            group.add(beam);
-            
-            return group;
-        }
-        
-        // ========== POSITION MARKING ==========
-        function markStartPosition() {
-            if (!renderer.xr.isPresenting) return;
-            
-            const pose = renderer.xr.getCamera(camera);
-            startPos = new THREE.Vector3();
-            pose.getWorldPosition(startPos);
-            
-            if (startMarker) scene.remove(startMarker);
-            
-            startMarker = createMarker(0x22c55e);
-            startMarker.position.copy(startPos);
-            scene.add(startMarker);
-            
-            updateStatus('Start marked - Now mark finish position', 'ready');
-            startBtn.disabled = false;
-            finishBtn.disabled = false;
-            
-            console.log('Start position marked:', startPos);
-        }
-        
-        function markFinishPosition() {
-            if (!renderer.xr.isPresenting || !startPos) return;
-            
-            const pose = renderer.xr.getCamera(camera);
-            finishPos = new THREE.Vector3();
-            pose.getWorldPosition(finishPos);
-            
-            const distance = startPos.distanceTo(finishPos);
-            if (distance < 1.0) {
-                updateStatus('Finish too close - Move further away', 'error');
-                return;
-            }
-            
-            if (finishMarker) scene.remove(finishMarker);
-            
-            finishMarker = createMarker(0xef4444);
-            finishMarker.position.copy(finishPos);
-            scene.add(finishMarker);
-            
-            updateStatus(`Course ready - Distance: ${distance.toFixed(2)}m`, 'ready');
-            finishBtn.disabled = false;
-            
-            isRunning = false;
-            startTime = null;
-            finalTime = null;
-            timerEl.textContent = '';
-            
-            console.log('Finish position marked:', finishPos, 'Distance:', distance.toFixed(2));
-        }
-        
-        function resetCourse() {
-            if (startMarker) {
-                scene.remove(startMarker);
-                startMarker = null;
-            }
-            if (finishMarker) {
-                scene.remove(finishMarker);
-                finishMarker = null;
-            }
-            
-            startPos = null;
-            finishPos = null;
-            isInStartZone = false;
-            isRunning = false;
-            startTime = null;
-            finalTime = null;
-            
-            updateStatus('Course reset - Mark start position', 'info');
-            timerEl.textContent = '';
-            startBtn.disabled = false;
-            finishBtn.disabled = true;
-            
-            console.log('Course reset');
-        }
-        
-        // ========== GAME LOGIC ==========
-        function updateGameLogic() {
-            if (!renderer.xr.isPresenting || !startPos || !finishPos) return;
-            
-            const pose = renderer.xr.getCamera(camera);
-            const currentPos = new THREE.Vector3();
-            pose.getWorldPosition(currentPos);
-            
-            const distToStart = currentPos.distanceTo(startPos);
-            const distToFinish = currentPos.distanceTo(finishPos);
-            
-            const inStartZone = distToStart <= ZONE_RADIUS;
-            const inFinishZone = distToFinish <= ZONE_RADIUS;
-            
-            if (!isRunning && !finalTime) {
-                if (inStartZone) {
-                    if (!isInStartZone) {
-                        updateStatus('In start zone - Leave to begin sprint', 'ready');
-                        isInStartZone = true;
-                    }
-                } else {
-                    if (isInStartZone) {
-                        isRunning = true;
-                        startTime = performance.now();
-                        updateStatus('Sprinting!', 'running');
-                        console.log('Sprint started!');
-                    }
-                    isInStartZone = false;
-                }
-            } else if (isRunning) {
-                const elapsed = performance.now() - startTime;
-                timerEl.textContent = formatTime(elapsed);
-                
-                if (inFinishZone) {
-                    isRunning = false;
-                    finalTime = elapsed;
-                    timerEl.textContent = formatTime(finalTime);
-                    updateStatus(`Finished - Time: ${formatTime(finalTime)}`, 'finished');
-                    console.log('Sprint finished! Time:', finalTime);
-                }
-            } else if (finalTime) {
-                if (inStartZone) {
-                    updateStatus('In start zone - Leave to sprint again', 'ready');
-                    isInStartZone = true;
-                    finalTime = null;
-                }
-            }
-            
-            if (startMarker) startMarker.rotation.y += 0.02;
-            if (finishMarker) finishMarker.rotation.y -= 0.02;
-        }
-        
-        // ========== UTILITIES ==========
-        function formatTime(ms) {
-            const seconds = Math.floor(ms / 1000);
-            const milliseconds = Math.floor(ms % 1000);
-            return `${seconds}.${milliseconds.toString().padStart(3, '0')}s`;
         }
         
         // ========== RENDER LOOP ==========
-        function render() {
-            updateGameLogic();
+        let lastTime = 0;
+        function render(time) {
+            const deltaTime = (time - lastTime) / 1000;
+            lastTime = time;
+            
+            updateHandPositions();
+            
+            // Update all particles
+            particles = particles.filter(particle => particle.update(deltaTime, hands));
+            
             renderer.render(scene, camera);
         }
         
-        // ========== START APPLICATION ==========
-        checkWebXRSupport();
+        // ========== START ==========
+        init();
         
-        enterArBtn.addEventListener('click', async () => {
-            init();
-            await startXRSession();
-        });
+        enterArBtn.addEventListener('click', startXRSession);
         
         window.addEventListener('resize', () => {
             if (camera && renderer) {
@@ -868,3 +484,6 @@
                 renderer.setSize(window.innerWidth, window.innerHeight);
             }
         });
+    </script>
+</body>
+</html>
