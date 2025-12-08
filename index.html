@@ -50,30 +50,41 @@
             const light = new THREE.AmbientLight(0xffffff, 1);
             scene.add(light);
 
-            // Load texture with crossOrigin
-            const loader = new THREE.TextureLoader();
-            loader.crossOrigin = 'anonymous';
+            // Try loading with a canvas texture instead
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 512;
+            const ctx = canvas.getContext('2d');
             
-            const texture = loader.load(
-                'https://blacket.org/content/packs/Candy.webp',
-                () => {
-                    console.log('Texture loaded successfully');
-                },
-                undefined,
-                (err) => {
-                    console.error('Texture load error:', err);
-                    // Fallback to a colored plane if image fails
-                    image.material.color.set(0xff00ff);
-                }
-            );
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = () => {
+                ctx.drawImage(img, 0, 0, 512, 512);
+                const texture = new THREE.CanvasTexture(canvas);
+                image.material.map = texture;
+                image.material.needsUpdate = true;
+                console.log('Image loaded!');
+            };
+            img.onerror = () => {
+                console.error('Failed to load image');
+                ctx.fillStyle = '#ff00ff';
+                ctx.fillRect(0, 0, 512, 512);
+                ctx.fillStyle = '#fff';
+                ctx.font = '48px Arial';
+                ctx.fillText('IMAGE FAILED', 50, 256);
+                const texture = new THREE.CanvasTexture(canvas);
+                image.material.map = texture;
+                image.material.needsUpdate = true;
+            };
+            img.src = 'https://blacket.org/content/packs/Candy.webp';
 
             // Create a bigger, more visible plane
             const geometry = new THREE.PlaneGeometry(1.5, 1.5);
+            const texture = new THREE.CanvasTexture(canvas);
             const material = new THREE.MeshBasicMaterial({ 
                 map: texture,
-                transparent: true,
-                side: THREE.DoubleSide,
-                color: 0xffffff
+                transparent: false,
+                side: THREE.DoubleSide
             });
             
             image = new THREE.Mesh(geometry, material);
